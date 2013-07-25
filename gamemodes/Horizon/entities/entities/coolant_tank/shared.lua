@@ -1,1 +1,1 @@
-ENT.Type = "anim"ENT.Base = "horizon_base_ent" ENT.PrintName		= "Coolant Tank"ENT.Author			= "Bynari"ENT.Purpose			= "Coolant Storage"ENT.IsHZN = true 
+ENT.Type = "anim"ENT.Base = "hzn_storage_ent" ENT.PrintName		= "Coolant Tank"ENT.Author			= "Bynari"ENT.Purpose			= "Coolant Storage" 

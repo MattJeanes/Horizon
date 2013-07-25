@@ -1,0 +1,1 @@
+ENT.Type = "anim"ENT.Base = "hzn_base_ent" ENT.PrintName		= "Production Device"ENT.Author			= "LoRAWN"ENT.Purpose			= "Produces Resources" 

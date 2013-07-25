@@ -1,1 +1,1 @@
-ENT.Type = "anim"ENT.Base = "base_gmodentity" ENT.PrintName		= "Nocxium Ore"ENT.Author			= "Bynari"ENT.Purpose			= "Horizon Mining Component"ENT.IsHZN = true 
+ENT.Type = "anim"ENT.Base = "base_gmodentity" ENT.PrintName		= "Nocxium Ore"ENT.Author			= "Bynari"ENT.Purpose			= "Horizon Mining Component" 

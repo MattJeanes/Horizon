@@ -1,1 +1,1 @@
-ENT.Type = "anim"ENT.Base = "horizon_base_ent" ENT.PrintName		= "Energy Cell"ENT.Author			= "Bynari"ENT.Purpose			= "Energy Storage"ENT.IsHZN = true 
+ENT.Type = "anim"ENT.Base = "hzn_storage_ent" ENT.PrintName		= "Energy Cell"ENT.Author			= "Bynari"ENT.Purpose			= "Energy Storage" 

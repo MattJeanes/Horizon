@@ -1,1 +1,1 @@
-ENT.Type = "anim"ENT.Base = "horizon_base_ent" ENT.PrintName		= "Water Pump"ENT.Author			= "Bynari"ENT.AutomaticFrameAdvance = true  ENT.IsHZN = true
+ENT.Type = "anim"ENT.Base = "hzn_production_ent" ENT.PrintName		= "Water Pump"ENT.Author			= "Bynari"ENT.AutomaticFrameAdvance = true 

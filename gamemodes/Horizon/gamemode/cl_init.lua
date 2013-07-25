@@ -2,6 +2,8 @@ include('shared.lua')
 
 DEFINE_BASECLASS( "gamemode_sandbox" )
 
+local FactoryEntries = {}
+
 local Air = Air or 0
 local Coolant = Coolant or 0
 local Power = Power or 0
@@ -31,8 +33,8 @@ local ps = ps or 0
 
 function GM:HUDPaint()
 	//Sandbox stuff.
-	if BaseClass then
-		BaseClass.HUDPaint(self)
+	if self.BaseClass then
+		self.BaseClass:HUDPaint()
 	end
 	
 	local ply = LocalPlayer()
@@ -118,20 +120,28 @@ net.Receive('hznSuit', function()
 	Power = net.ReadUInt(8)
 end)
 
-//A device is turned on or off.
+--A device is turned on or off.
 net.Receive('hznState', function()
 	local entity = net.ReadEntity()	
 	entity.Active = (net.ReadBit() == 1)
 end)
 
 
-//Get a state of a entity when we know about it if it was made more than a second ago.
+--Get a state of a entity when we know about it if it was made more than a second ago.
 function GM:NetworkEntityCreated( ent )
-		if ( self:IsHznClass(ent:GetClass()) and ent:GetCreationTime() < (CurTime() - 1.0) ) then
+		if ( GAMEMODE:IsHznClass(ent:GetClass()) and ent:GetCreationTime() < (CurTime() - 1.0) ) then
 			net.Start('hznGetState')
 				net.WriteEntity(ent)
 			net.SendToServer()
 		end
 		
 		self.BaseClass:NetworkEntityCreated(ent)
+end
+
+function GM:RegisterFactoryEntry( FactoryEntry )
+	FactoryEntries[FactoryEntry.DisplayName] = FactoryEntry
+end
+
+function GM:GetFactoryEntries()
+	return FactoryEntries
 end

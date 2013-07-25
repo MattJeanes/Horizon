@@ -1,1 +1,1 @@
-ENT.Type = "anim"ENT.Base = "horizon_base_ent" ENT.PrintName		= "Link Hub"ENT.Author			= "Bynari"ENT.Purpose			= "Networking"ENT.IsHZN = true 
+ENT.Type = "anim"ENT.Base = "hzn_base_ent" ENT.PrintName		= "Link Hub"ENT.Author			= "Bynari"ENT.Purpose			= "Networking" 

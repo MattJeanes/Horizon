@@ -33,23 +33,6 @@ local function SendState(lng, ply)
 end
 net.Receive('hznGetState', SendState)
 
-//Check if suit states are the same and if not send to client.
-function Ply:SuitUpdate()
-	if (self.suitAir == self.suitAirLast
-	and self.suitCoolant == self.suitCoolantLast
-	and self.suitPower == self.suitPowerLast) then return end
-	
-	self.suitAirLast		= self.suitAir
-	self.suitCoolantLast	= self.suitCoolant
-	self.suitPowerLast		= self.suitPower
-	
-	net.Start('hznSuit')
-		net.WriteUInt(self.suitAir, 8)
-		net.WriteUInt(self.suitCoolant, 8)
-		net.WriteUInt(self.suitPower, 8)
-	net.Send(self)
-end
-
 local function RemoveFromCache(ent)
 	if stateCache[ent:EntIndex()] != nil then
 		stateCache[ent:EntIndex()] = nil
@@ -57,26 +40,9 @@ local function RemoveFromCache(ent)
 end
 hook.Add('EntityRemoved', 'hznRemoveCache', RemoveFromCache)
 
-//Add all net messages.
-util.AddNetworkString('netAirComp')
-util.AddNetworkString('netAirTank')
-util.AddNetworkString('netCoolComp')
-util.AddNetworkString('netCoolantTank')
-util.AddNetworkString('netEnerCell')
-util.AddNetworkString('netFusionReactor')
-util.AddNetworkString('netGravGen')
-util.AddNetworkString('netGroundWExtractor')
-util.AddNetworkString('netHydrogenCoolant')
-util.AddNetworkString('netHydrogenTank')
-util.AddNetworkString('netMineralCrate')
-util.AddNetworkString('netMiningDrill')
-util.AddNetworkString('netMiningLas')
-util.AddNetworkString('netOreSilo')
-util.AddNetworkString('netRemoteSuitCharger')
-util.AddNetworkString('netSuitRecharger')
-util.AddNetworkString('netWaterPump')
-util.AddNetworkString('netWaterSplit')
-util.AddNetworkString('netWaterTank')
+--Add net messages.
 util.AddNetworkString('hznSuit')
 util.AddNetworkString('hznState')
 util.AddNetworkString('hznGetState')
+--
+util.AddNetworkString('netEntityInfo')

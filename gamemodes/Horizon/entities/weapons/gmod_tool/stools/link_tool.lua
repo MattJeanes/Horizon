@@ -126,7 +126,7 @@ function TOOL:LeftClick( tr )
 				--Now, let's add any new resources to the network's resource list
 				for _, ent in pairs( newNetwork ) do
 					
-					if ent.deviceType == "storage" then
+					if ent.DeviceType == "storage" then
 						GAMEMODE:addToResourceList( ent )
 					end
 				end
@@ -153,7 +153,7 @@ function TOOL:LeftClick( tr )
 					
 					table.insert(GAMEMODE.networks[entA.networkID], entB)
 					
-					if entB.deviceType == "storage" then
+					if entB.DeviceType == "storage" then
 						GAMEMODE:addToResourceList( entB )
 					end
 					
@@ -176,7 +176,7 @@ function TOOL:LeftClick( tr )
 					
 					table.insert(GAMEMODE.networks[entB.networkID], entA)
 					
-					if entA.deviceType == "storage" then
+					if entA.DeviceType == "storage" then
 						GAMEMODE:addToResourceList( entA )
 					end
 					
@@ -241,7 +241,7 @@ function TOOL:LeftClick( tr )
 					
 					for _, ent in pairs( GAMEMODE.networks[GAMEMODE.nextNet]) do
 					
-						if ent.deviceType == "storage" then
+						if ent.DeviceType == "storage" then
 						
 							GAMEMODE:addToResourceList( ent )
 						

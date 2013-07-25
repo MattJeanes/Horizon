@@ -1,0 +1,1 @@
+ENT.Type = "anim"ENT.Base = "base_gmodentity" ENT.PrintName		= "Horizon Base Entity"ENT.Author			= "Bynari" 

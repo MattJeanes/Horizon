@@ -1,1 +1,1 @@
-ENT.Type = "anim"ENT.Base = "base_gmodentity" ENT.PrintName		= "Mineral Crate"ENT.Author			= "Bynari"ENT.Purpose			= "Mineral Storage"ENT.IsHZN = true 
+ENT.Type = "anim"ENT.Base = "hzn_storage_ent" ENT.PrintName		= "Mineral Crate"ENT.Author			= "Bynari"ENT.Purpose			= "Mineral Storage" 

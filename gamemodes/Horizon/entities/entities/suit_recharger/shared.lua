@@ -1,1 +1,1 @@
-ENT.Type = "anim"ENT.Base = "horizon_base_ent" ENT.PrintName		= "Suit Recharger"ENT.Author			= "Bynari"ENT.IsHZN = true 
+ENT.Type = "anim"ENT.Base = "hzn_consumer_ent" ENT.PrintName		= "Suit Recharger"ENT.Author			= "Bynari"

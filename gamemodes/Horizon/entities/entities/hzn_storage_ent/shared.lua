@@ -1,0 +1,1 @@
+ENT.Type = "anim"ENT.Base = "hzn_base_ent" ENT.PrintName		= "Storage Tank"ENT.Author			= "LoRAWN"ENT.Purpose			= "Resource Storage" 

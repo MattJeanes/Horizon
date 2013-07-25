@@ -1,1 +1,1 @@
-ENT.Type = "anim"ENT.Base = "base_gmodentity" ENT.PrintName		= "Small Asteroid"ENT.Author			= "Bynari"ENT.IsHZN = true 
+ENT.Type = "anim"ENT.Base = "base_gmodentity" ENT.PrintName		= "Small Asteroid"ENT.Author			= "Bynari" 

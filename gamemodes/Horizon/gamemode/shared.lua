@@ -3,7 +3,13 @@ GM.Author	= "Bynari"
 GM.Email	= ""
 GM.Website  = ""
 
+include("./player_class/player_horizon.lua")
+
 DeriveGamemode( "sandbox" )
+
+function GM:Initialize()
+
+end
 
 function commas(num)
 
@@ -32,17 +38,18 @@ end
 
 
 local ClassTable = ClassTable or {}
-//Add class name to list of valid Horizon entitys.
-//We do this for it to be an easy check on spawning entitys that do not have IsHZN set yet.
-function GM:AddClassName(name)
-	if self:IsHznClass(name) then return end
-	
-	table.insert(ClassTable, name)
-end
 
 function GM:IsHznClass(name)
 	return table.HasValue(ClassTable, name)
 end
+
+//Add class name to list of valid Horizon entitys.
+//We do this for it to be an easy check on spawning entitys that do not have IsHZN set yet.
+function GM:AddClassName(name)
+	if GM:IsHznClass(name) then return end
+	table.insert(ClassTable, name)
+end
+
 
 GM:AddClassName('air_compressor')
 GM:AddClassName('air_tank')
