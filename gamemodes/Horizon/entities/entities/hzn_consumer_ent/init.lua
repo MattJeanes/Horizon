@@ -47,6 +47,7 @@ function ENT:ConsumeResources()
 end
 
 function ENT:Think()
+	--self.BaseClass.Think( self )
 	-- schedule next think
 	local CTime = CurTime()
 	self.Entity:NextThink( CTime )
@@ -65,9 +66,7 @@ function ENT:Think()
 	self:Failed()
 end
 
-function ENT:netUpdate() return end
-
-function ENT:CanOperate() return true end
+function ENT:CanOperate() return false end
 
 function ENT:Execute() return end
 

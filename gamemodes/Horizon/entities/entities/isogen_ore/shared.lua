@@ -1,0 +1,1 @@
+ENT.Type = "anim"ENT.Base = "base_gmodentity" ENT.PrintName		= "Isogen Ore"ENT.Author			= "Bynari"ENT.Purpose			= "Horizon Mining Component"

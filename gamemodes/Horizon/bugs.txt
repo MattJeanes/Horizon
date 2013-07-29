@@ -1,0 +1,5 @@
+known bugs:
+
+* suit status does not get updated on player spawn
+* gravity generator not implemented yet
+* link hubs not interconnectable

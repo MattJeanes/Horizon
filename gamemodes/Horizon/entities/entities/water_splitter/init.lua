@@ -42,7 +42,6 @@ end
 function ENT:On()
 	self.Entity:EmitSound( "apc_engine_start" )
 	self.Active = true
-	self:SetState(true)
 	self:ResetSequence(self:LookupSequence("active"))	
 end
 
@@ -50,7 +49,6 @@ function ENT:Off()
 	self.Entity:StopSound( "apc_engine_start" )
 	self.Entity:EmitSound( "apc_engine_stop" )
 	self.Active = false
-	self:SetState(false)
 	self:ResetSequence(self:LookupSequence("idle"))	
 end
 

@@ -8,290 +8,110 @@ TOOL.ClientConVar[ "material" ] = "cable/cable"
 
 if ( CLIENT ) then
     language.Add( "Tool.link_tool.name", "Link Tool" );
-    language.Add( "Tool.link_tool.desc", "Link Horizon Devices" );
-	language.Add( "Tool.link_tool.0", "Left click to link two devices. Reload to unlink device." );
-	language.Add( "Tool.link_tool.1", "Left click annother device to link them.")
+    language.Add( "Tool.link_tool.desc", "Creates a link between two devices." );
+	language.Add( "Tool.link_tool.0", "Left click to select first device." );
+	language.Add( "Tool.link_tool.1", "Left click to select second device. Reload to clear selection.")
 end
-
-//local cycleComplete = false
 
 function TOOL:Deploy()
 	self:ClearObjects()
 end
 
-function TOOL:LeftClick( tr )
-
-	if (!tr.Entity:IsValid(tr.Entity.linkable)) or (tr.Entity:IsPlayer()) then return end
-		
-		local timesFired = self:NumObjects()
-		
-		if (timesFired == 0) then
-		
-			entA = tr.Entity	
-			self:SetObject( timesFired + 1, tr.Entity, tr.HitPos, tr.Entity:GetPhysicsObjectNum( tr.PhysicsBone ), tr.PhysicsBone, tr.HitNormal )
-			self:SetStage(1)
-			
-			return true
-		end
-		
-			
-		local entA = self:GetEnt(1)
-		if !entA:IsValid() then self:ClearObjects() return false end
-		
-		if entA:GetPos():Distance( tr.Entity:GetPos() ) > 800 then
-			self:ClearObjects()
-			
-			if CLIENT then
-				notification.AddLegacy('Link is to long!', NOTIFY_ERROR, 6)
-				surface.PlaySound('buttons/button10.wav')
-			end
-			
-			return true
-		end
-		
-		-------------- rope code---------
-		if SERVER then
-			
-			local Phys = tr.Entity:GetPhysicsObjectNum( tr.PhysicsBone )
-			self:SetObject( timesFired + 1, tr.Entity, tr.HitPos, Phys, tr.PhysicsBone, tr.HitNormal )
-		
-			if (timesFired > 0) then		
-		
-					local forcelimit = 0
-					local addlength  = 100
-					local material   = self:GetClientInfo( "material" )
-					local width      = self:GetClientNumber( "width" ) or 1.5
-					local rigid      = false
-				
-					// Get information we're about to use
-					local Ent1,  Ent2  = self:GetEnt(1),     self:GetEnt(2)
-					local Bone1, Bone2 = self:GetBone(1),    self:GetBone(2)
-					local WPos1, WPos2 = self:GetPos(1),     self:GetPos(2)
-					local LPos1, LPos2 = self:GetLocalPos(1),self:GetLocalPos(2)
-					local length = ( WPos1 - WPos2):Length()
-					
-					
-					if Ent1 != Ent2 then
-						if ( Ent1.networkID != nil and Ent2.networkID != nil ) and ( Ent1.networkID == Ent2.networkID )  then
-						 self:ClearObjects()
-						 return true
-						end
-						
-						constraint.Rope( Ent1, Ent2, Bone1, Bone2, LPos1, LPos2, length, addlength, forcelimit, width, material, rigid )
-					end
-		
-			
-				if Ent1 == Ent2 then
-				
-					self:ClearObjects()
-					return true
-			
-				end
-				
- 	
-			end
-		end
-		
-		---------------------------------
-		
-		
-		if (tr.Entity != entA) then
-			
-			local cycleComplete = false
-			
-			entB = tr.Entity
-			
-			if entA.connections == nil then return true end
-			if entB.connections == nil then return true end
-			
-			
-			if entA.networkID == nil and entB.networkID == nil then
-			
-									
-				entA.networkID = GAMEMODE.nextNet
-				table.insert(entA.connections, entB)
-					
-			
-				entB.networkID = GAMEMODE.nextNet
-				table.insert(entB.connections, entA)	
-			
-				newNetwork = {}
-				newNetwork[1] = {}
-				newNetwork[2] = entA
-				newNetwork[3] = entB
-					
-				GAMEMODE.networks[GAMEMODE.nextNet] = newNetwork
-			
-			
-				--Now, let's add any new resources to the network's resource list
-				for _, ent in pairs( newNetwork ) do
-					
-					if ent.DeviceType == "storage" then
-						GAMEMODE:addToResourceList( ent )
-					end
-				end
-		
-				--Next, we need to get a count of all resources on the network
-				GAMEMODE:updateResourceCount(GAMEMODE.nextNet)
-			
-				-- Increment to next available network ID
-				GAMEMODE.nextNet = GAMEMODE.nextNet + 1			
-					
-				cycleComplete = true;
-			end
-			
-			
-			if entA.networkID != nil and entB.networkID == nil then
-			
-				if cycleComplete == false then
-					
-					--add each other to connections table
-					table.insert(entA.connections, entB)					
-					table.insert(entB.connections, entA)
-					
-					entB.networkID = entA.networkID
-					
-					table.insert(GAMEMODE.networks[entA.networkID], entB)
-					
-					if entB.DeviceType == "storage" then
-						GAMEMODE:addToResourceList( entB )
-					end
-					
-					GAMEMODE:updateResourceCount( entA.networkID )
-					
-					cycleComplete = true
-				end
-			
-			end
-			
-			if entB.networkID != nil and entA.networkID == nil then
-				
-				if cycleComplete == false then
-
-					--add each other to connections table
-					table.insert(entA.connections, entB)					
-					table.insert(entB.connections, entA)
-					
-					entA.networkID = entB.networkID
-					
-					table.insert(GAMEMODE.networks[entB.networkID], entA)
-					
-					if entA.DeviceType == "storage" then
-						GAMEMODE:addToResourceList( entA )
-					end
-					
-					GAMEMODE:updateResourceCount( entB.networkID )
-					
-					cycleComplete = true
-				end
-			
-			end
-			
-			if entA.networkID !=nil and entB.networkID != nil then
-			
-				if entA.networkID == entB.networkID  and cycleComplete == false then
-
-					table.insert(entA.connections, entB)					
-					table.insert(entB.connections, entA)
-					
-					
-					cycleComplete = true
-				end	
-			
-				if cycleComplete == false then								
-					
-					table.insert(entA.connections, entB)					
-					table.insert(entB.connections, entA)
-					
-					local oldNetA = GAMEMODE.networks[entA.networkID]
-					local oldNetB = GAMEMODE.networks[entB.networkID]
-										
-					local NetworkA = GAMEMODE.networks[entA.networkID]
-					local NetworkB = GAMEMODE.networks[entB.networkID]
-					
-					local newNetwork = {}
-					newNetwork[1] = {}
-					
-					for _, ent in pairs( NetworkA ) do
-					
-						if ent.linkable == true then
-							
-							ent.networkID = GAMEMODE.nextNet
-							table.insert(newNetwork, ent)
-						
-						end
-					
-					end
-					
-					for _, ent in pairs( NetworkB ) do
-					
-						if ent.linkable == true then
-						
-							ent.networkID = GAMEMODE.nextNet
-							table.insert(newNetwork, ent)
-						
-						end
-					
-					end
-					
-					GAMEMODE.networks[oldNetA] = nil
-					GAMEMODE.networks[oldNetB] = nil
-					
-					GAMEMODE.networks[GAMEMODE.nextNet] = newNetwork
-					
-					for _, ent in pairs( GAMEMODE.networks[GAMEMODE.nextNet]) do
-					
-						if ent.DeviceType == "storage" then
-						
-							GAMEMODE:addToResourceList( ent )
-						
-						end
-					
-					end
-					
-					GAMEMODE:updateResourceCount( GAMEMODE.nextNet )
-					
-					GAMEMODE.nextNet = GAMEMODE.nextNet + 1
-										
-					
-				end
-			end
-			
-			self:ClearObjects()
-			
-		end
-		
-	
-	
-	if (CLIENT) then return true end
-	
-	return true
-	
-end
-
-function TOOL:Reload( tr )
-	
-	self:ClearObjects()
-	
-	if tr.Entity.linkable == true then
-	
-		if tr.Entity.networkID != nil then
-			GAMEMODE:unlinkDevice(tr.Entity)
-			GAMEMODE:fixStragglers()
-		end	
-		if (CLIENT) then return true end
-
-		local bool = constraint.RemoveConstraints( tr.Entity, "Rope" )
-		return bool
-	
+function TOOL:LeftClick( trace )
+	if (not trace.Entity:IsValid()) or (trace.Entity:IsPlayer()) then return false end
+	if CLIENT then return true end
+	-- stage 0
+	if self:GetStage() == 0 then
+		self.FirstEnt = trace.Entity
+		self:SetStage( 1 )
+		return true
 	end
+	-- stage 1
+	self.SecondEnt = trace.Entity
+	if self.FirstEnt == self.SecondEnt then
+		-- can not link device to itself
+		self:GetOwner():PrintMessage( HUD_PRINTTALK, "Cannot link device to itself!" )
+		self:SetStage( 0 )
+		return false
+	end
+	if ( self.FirstEnt:GetClass() == "link_hub" and self.SecondEnt:GetClass() == "link_hub" ) then
+		-- can not (yet) link two link_hubs together
+		self:GetOwner():PrintMessage( HUD_PRINTTALK, "Cannot link two link_hub devices!" )
+		self:SetStage( 0 )
+		return false
+	end
+	if ( ( self.FirstEnt:GetClass() != "link_hub" and self.SecondEnt:GetClass() != "link_hub" ) ) then
+		-- can only link entities to link_hubs
+		self:GetOwner():PrintMessage( HUD_PRINTTALK, "Cannot link two non link_hub devices!" )
+		self:SetStage( 0 )
+		return false
+	end
+	if ( self.FirstEnt:GetClass() == "link_hub" ) then
+		self.FirstEnt:AddDevice( self.SecondEnt )
+		self:AddRope(self.FirstEnt, self.SecondEnt)
+		self:GetOwner():PrintMessage( HUD_PRINTTALK, "Link completed!" )
+		self.FirstEnt = nil
+		self.SecondEnt = nil
+		self:SetStage( 0 )
+		return true
+	end
+	if ( self.SecondEnt:GetClass() == "link_hub" ) then
+		self.SecondEnt:AddDevice( self.FirstEnt )
+		self:AddRope(self.SecondEnt, self.FirstEnt)
+		self:GetOwner():PrintMessage( HUD_PRINTTALK, "Link completed!" )
+		self.FirstEnt = nil
+		self.SecondEnt = nil
+		self:SetStage( 0 )
+		return true
+	end
+	return false
+end
 
+function TOOL:AddRope( BeginEnt, EndEnt )
+	local length = ( BeginEnt:GetPos() - EndEnt:GetPos() ):Length()
+	local width = self:GetClientNumber( "width" ) or 1.5
+	local material   = self:GetClientInfo( "material" )
+	constraint.Rope( BeginEnt, EndEnt, 0, 0, Vector(0,0,0), Vector(0,0,0), length, 100, 0, width, material, false ) 
+end
+
+function TOOL:RightClick( trace )
+	if (not trace.Entity:IsValid()) or (trace.Entity:IsPlayer()) then return false end
+	if CLIENT then return true end
+	local width = self:GetClientNumber( "width" ) or 1.5
+	local material   = self:GetClientInfo( "material" )
+	local ent = trace.Entity
+	if ( ent:GetClass() == "link_hub" ) then
+		ent:ClearDevices()
+		local inRange = ents.FindInSphere( ent:GetPos(), 128)
+		for _, v in pairs( inRange ) do
+			if v:GetClass() != "link_hub" and not v:IsPlayer() and v.netUpdate != nil then
+				ent:AddDevice( v )
+				local length = (ent:GetPos() - v:GetPos()):Length()
+				constraint.Rope( ent, v, 0, 0, Vector(0,0,0), Vector(0,0,0), length, 100, 0, width, material, false ) 
+			end
+		end
+		self:GetOwner():PrintMessage( HUD_PRINTTALK, "Links completed!" )
+		return true
+	end
+	return false
+end
+
+function TOOL:Reload( trace )
+	if (not trace.Entity:IsValid()) or (trace.Entity:IsPlayer()) then return false end
+	if CLIENT then return true end
+	-- clear link_hub
+	if trace.Entity:GetClass() == "link_hub" then
+		self:GetOwner():PrintMessage( HUD_PRINTTALK, "Links removed!" )
+		trace.Entity:ClearDevices()
+		return true
+	end
+	-- clear other entities
+	if trace.Entity.Link == nil then return true end
+	trace.Entity.Link:RemoveDevice( trace.Entity )
+	self:GetOwner():PrintMessage( HUD_PRINTTALK, "Link removed!" )
 	return true
-	
 end
 
-function TOOL:AddCable(Ent1, Ent2)
-end
 
 function TOOL.BuildCPanel( CPanel )
 	CPanel:AddControl( "ComboBox", 
@@ -304,6 +124,5 @@ function TOOL.BuildCPanel( CPanel )
 	})
 	CPanel:AddControl( "Slider", 		{ Label = "Width",		Type = "Float", 	Command = "link_tool_width", 		Min = "0", 	Max = "10" }  )
 	CPanel:AddControl( "RopeMaterial", 	{ Label = "Link Material",	convar	= "link_tool_material" }  )
-									
 end
 

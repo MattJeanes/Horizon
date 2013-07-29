@@ -3,23 +3,18 @@ AddCSLuaFile( "shared.lua" )
  
 include('shared.lua')
 
+-- Remove devices from link hubs if they were connected
 function ENT:OnRemove()
-end
-
-function ENT:PreEntityCopy()
-end
-
-function ENT:PostEntityPaste(pl, Ent, CreatedEntities)
-end
-
-function ENT:LinkDupes(entA, entB)
+	if self:GetClass() == "link_hub" then self:ClearDevices() end
+	if self.Link != nil then self.Link:RemoveDevice( self ) end
 end
 
 function ENT:Think()
-	-- update status baloon, and discard excess resources
 	self:netUpdate()
+	return
 end
 
+-- updates status baloons
 function ENT:netUpdate()
 	net.Start( "netEntityInfo" )
 		net.WriteEntity( self )

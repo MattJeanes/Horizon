@@ -9,29 +9,60 @@ DEFINE_BASECLASS( "gamemode_sandbox" )
 
 ---------------------------------------------------------------------------------
 local temps = {}
-temps[1] = "cold"
-temps[2] = "temperate"
-temps[3] = "hot" 
+	temps[1] = "cold"
+	temps[2] = "temperate"
+	temps[3] = "hot" 
 local LastAsteroidSpawn = 0
 local LastThink = 0
 local ThinkRate = 1
 local FactoryEntries = {}
 ---------------------------------------------------------------------------------
 
--- Sets the default environment for entities
-function GM:SetDefaultEnv( entity )
-	entity.CurrentEnv = nil
+-- Sets the default environment for an entity ( default environment = space )
+function GM:SetDefaultEnv( ent )
+	ent.CurrentEnv = nil
 	-- for players
-	if entity:IsPlayer() then
-		entity:SetGravity(0.0000001)
+	if ent:IsPlayer() then
+		self:AdjustGravity( ent, 0.00001 )
 		return
 	end
-	-- for ragdolls
+	self:AdjustGravity( ent, 0 )
+end
+
+-- Sets the environment of the given entity to the new environment if its priority is higher
+function GM:SetEnvironment( entity, newEnv )
+	if entity.CurrentEnv == nil then
+		entity.CurrentEnv = newEnv
+		self:AdjustGravity(entity, newEnv.dt.Gravity)
+		return
+	end
+	if newEnv.dt.Priority <= entity.CurrentEnv.dt.Priority then
+		entity.CurrentEnv = newEnv
+		self:AdjustGravity(entity, newEnv.dt.Gravity)
+		return
+	end
+end
+
+-- Adjusts the gravity of an entity according to the environment it is in
+function GM:AdjustGravity( ent, gravity )
+	-- adjust gravity in case the entity is a player
+	ent:SetGravity( gravity )
+	local gravityOn = (gravity != 0)
 	local phys
-	for i = 0, (entity:GetPhysicsObjectCount() - 1), 1 do
-		phys = entity:GetPhysicsObjectNum(i)
-	    phys:EnableGravity(false)
-		phys:EnableDrag(false)
+	-- adjust gravity on a ragdoll entity
+	for i = 0, (ent:GetPhysicsObjectCount() - 1), 1 do
+		phys = ent:GetPhysicsObjectNum( i )
+		if phys:IsValid() then
+			phys:EnableGravity( gravityOn )
+			phys:EnableDrag( gravityOn )
+		end
+	end
+	-- adjust gravity on a physics entity
+	if ( ent:IsValid() ) then
+		phys = ent:GetPhysicsObject()
+		if not phys:IsValid() then return end
+		phys:EnableGravity( gravityOn )
+		phys:EnableDrag( gravityOn )
 	end
 end
 
@@ -56,54 +87,11 @@ function GM:InitPostEntity()
 	self:GetSun()
 end
 
--- Give players spawn immunity for first spawn
-function GM:PlayerInitialSpawn( ply )
-	-- TODO: implement
-end
-
 -- Reset suit values
 function GM:PlayerSpawn( ply )
 	self.BaseClass:PlayerSpawn( ply )
 	player_manager.SetPlayerClass( ply, "player_horizon" )
-end
-
--- Sets the environment of the given entity to the new environment if its priority is higher
-function GM:SetEnvironment( entity, newEnv )
-	if entity.CurrentEnv == nil then
-		entity.CurrentEnv = newEnv
-		self:AdjustGravity(entity, newEnv)
-	end
-	if newEnv.dt.Priority <= entity.CurrentEnv.dt.Priority then
-		entity.CurrentEnv = newEnv
-		self:AdjustGravity(entity, newEnv)
-	end
-end
-
--- Adjusts the gravity of an entity according to the environment it is in
-function GM:AdjustGravity( ent, env )
-	local gravity = env.dt.Gravity
-	-- adjust gravity in case the entity is a player
-	if ent:IsPlayer() then
-		ent:SetGravity( gravity )
-		return
-	end
-	local gravityOn = (gravity != 0)
-	local phys
-	-- adjust gravity on a ragdoll entity
-	for i = 0, (ent:GetPhysicsObjectCount() - 1), 1 do
-		phys = ent:GetPhysicsObjectNum( i )
-		if phys:IsValid() then
-			phys:EnableGravity( gravityOn )
-			phys:EnableDrag( gravityOn )
-		end
-	end
-	-- adjust gravity on a physics entity
-	if ( ent:IsValid() ) then
-		phys = ent:GetPhysicsObject()
-		if not phys:IsValid() then return end
-		phys:EnableGravity( gravityOn )
-		phys:EnableDrag( gravityOn )
-	end
+	player_manager.RunClass(ply, "netUpdate", ply)
 end
 
 -- Hurts the given player
@@ -113,14 +101,6 @@ function GM:HurtPlayer( ply, dmg )
 		ply:EmitSound("buttons/combine_button3.wav")
 		if ply:Health() < 1 then ply:Kill() end
 	end
-end
-
--- Check if an entity is already in a list (as a value)
-function GM:ContainsValue( list, v )
-	for _, entry in pairs( list ) do
-		if entry == v then return true end
-	end
-	return false
 end
 
 -- Generates a random position in a cube
@@ -135,18 +115,16 @@ end
 -- Returns one of three asteroid classnames
 function GM:ChooseAsteroidType()
 	local rand = math.random()
-	if ( rand <= 0.33 ) then 
-		return "lg_asteroid"
+	if ( rand <= 0.49 ) then 
+		return "hzn_asteroid_large"
 	end
-	if ( rand > 0.33 and rand <= 0.66 ) then
-		return "med_asteroid"
-	end
-	return "sm_asteroid"
+	return "hzn_asteroid_medium"
 end
 
 -- Tries to spawns an asteroid of random type in a random (free) location
 function GM:SpawnAsteroid()
 	local ent = ents.Create(self:ChooseAsteroidType())
+	--local ent = ents.Create( "hzn_asteroid_large" )
 	local coords = self:GetMapCoords( 15000 )
 	local tries = 0
 	while table.Count( ents.FindInSphere(coords, 500) ) > 0  and tries < 5 do

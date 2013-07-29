@@ -45,7 +45,6 @@ function ENT:On()
 	self.Entity:EmitSound( "trainyard.train_move" )
 	self.Entity:EmitSound( "trainyard.train_idle" )
 	self.Active = true
-	self:SetState(true)
 	local sequence = self:LookupSequence("start")
 	self.Activating = true
 	self.Duration = self:SequenceDuration(sequence)
@@ -64,7 +63,6 @@ function ENT:Off()
 	self.Entity:StopSound( "trainyard.train_idle" )
 	self.Entity:EmitSound( "trainyard.train_brake" )
 	self.Active = false
-	self:SetState(false)
 	local sequence = self:LookupSequence("stop")
 	self:ResetSequence(sequence)	
 end

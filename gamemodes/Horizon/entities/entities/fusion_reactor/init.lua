@@ -42,13 +42,11 @@ function ENT:On()
 	self.Entity:EmitSound( "k_lab.ambient_powergenerators" )
 	self.Entity:EmitSound( "ambient/machines/thumper_startup1.wav" )
 	self.Active = true
-	self:SetState(true)
 end
 
 function ENT:Off()
 	self.Entity:StopSound( "k_lab.ambient_powergenerators" )
 	self.Active = false
-	self:SetState(false)
 end
 
 function ENT:CanOperate()

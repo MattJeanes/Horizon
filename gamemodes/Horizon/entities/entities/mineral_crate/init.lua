@@ -40,7 +40,7 @@ function ENT:StartTouch( hitEnt )
 		return
 	end
 	-- since small asteroids will explode if they touch an hzn_environment, this resource needs to be mined in space
-	if ( hitEnt:GetClass() == "sm_asteroid" and self.StoredResources["isogen"] < self.MaxStoredResources["isogen"]) then
+	if ( hitEnt:GetClass() == "isogen_ore" and self.StoredResources["isogen"] < self.MaxStoredResources["isogen"]) then
 		hitEnt:Remove()			
 		self.Entity:EmitSound( "cavernrock.impacthard" )
 		self:AddResource( "isogen", 10 )

@@ -88,9 +88,7 @@ function ENT:Think()
 	self:Failed()
 end
 
-function ENT:netUpdate() end
-
-function ENT:CanOperate() end
+function ENT:CanOperate() return false end
 
 function ENT:Failed() end
 

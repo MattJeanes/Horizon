@@ -32,7 +32,6 @@ function ENT:On()
 	self.Entity:EmitSound( "apc_engine_start" )
 	self.Entity:EmitSound( "npc/turret_floor/deploy.wav" )
 	self.Active = true
-	self:SetState(true)
 	local sequence = self:LookupSequence("deploy")
 	self:ResetSequence(sequence)
 end
@@ -42,7 +41,6 @@ function ENT:Off()
 	self.Entity:EmitSound( "apc_engine_stop" )
 	self.Entity:EmitSound( "npc/turret_floor/retract.wav" )
 	self.Active = false
-	self:SetState(false)
 	local sequence = self:LookupSequence("retract")
 	self:ResetSequence(sequence)	
 end

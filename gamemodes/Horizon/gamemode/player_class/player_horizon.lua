@@ -75,10 +75,10 @@ local function onPlayerSuitUpdate()
 			v.SuitPowerLast		= v.SuitPower
 			-- send info
 			net.Start('hznSuit')
-				net.WriteUInt(v.SuitAir, 8)
-				net.WriteUInt(v.SuitCoolant, 8)
-				net.WriteUInt(v.SuitPower, 8)
-			net.Send(v)
+				net.WriteUInt( v.SuitAir, 8 )
+				net.WriteUInt( v.SuitCoolant, 8 )
+				net.WriteUInt(v.SuitPower, 8 )
+			net.Send( v )
 		end
 	end
 end
@@ -97,6 +97,14 @@ end
 -- Called when the player spawns
 function PLAYER:Spawn()
 	BaseClass:Spawn()
+end
+
+function PLAYER:netUpdate( ply )
+	net.Start('hznSuit')
+		net.WriteUInt( ply.SuitAir, 8 )
+		net.WriteUInt( ply.SuitCoolant, 8 )
+		net.WriteUInt( ply.SuitPower, 8 )
+	net.Send( ply )
 end
 
 -- Clientside only

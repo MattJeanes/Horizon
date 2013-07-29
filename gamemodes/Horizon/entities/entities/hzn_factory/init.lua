@@ -23,9 +23,6 @@ function ENT:Initialize()
 	self.CrateID = 0
 	-- Build Factory inventory
 	self.FactoryEntries = GAMEMODE:GetFactoryEntries()
-	--Initialize item costs	-- [1] = morphite, [2] = nocxium, [3] = isogen
-
-	-- End item costs
 	-- check physics
 	local phys = self:GetPhysicsObject()
 	if (phys:IsValid()) then
@@ -75,6 +72,49 @@ function ENT:Dissolve(ent)
 	self.Entity:StopSound( "WeaponDissolve.Beam" )
 end
 
+function ENT:CheckResources( costs )
+	-- check if factory is linked to a network
+	if self.Link == nil then
+		return false
+	end
+	-- check if the required resources are available
+	for r, a in pairs( costs ) do
+		local amount = self.Link:RetrieveResource( r, a )
+		if amount < a then
+			self.Link:StoreResource( r, a)
+			return false
+		end
+		self.Link:StoreResource( r, amount )
+	end
+	return true
+end
+
+-- function ENT:CheckResources( costs )
+	--check if factory is linked to a network
+	-- if self.Link == nil then
+		-- return false
+	-- end
+	--check if the required resources are available
+	-- local Morphite = self.Link:RetrieveResource( "morphite", costs.Morphite )
+	-- local Nocxium = self.Link:RetrieveResource( "nocxium", costs.Nocxium )
+	-- local Isogen = self.Link:RetrieveResource( "isogen", costs.Isogen )
+	-- if ( costs.Morphite <= Morphite and costs.Nocxium <= Nocxium and costs.Isogen <= Isogen ) then
+		--consume resources
+		-- return true
+	-- end
+	--put resources back
+	-- self.Link:StoreResource( "morphite", Morphite)
+	-- self.Link:StoreResource( "nocxium", Nocxium)
+	-- self.Link:StoreResource( "isogen", Isogen)
+	-- return false 	
+-- end
+
+function ENT:ConsumeRequirements( costs )
+	for r, a in pairs( costs ) do
+		self.Link:RetrieveResource( r, a )
+	end
+end
+
 function ENT:BeginReplication( product )
 	-- create the crate containing the product
 	local ent = ents.Create( "factory_crate" )
@@ -112,26 +152,6 @@ function ENT:CompleteCrate( ent )
 	return ent
 end
 
-function ENT:CheckResources( costs )
-	-- check if factory is linked to a network
-	if self.Link == nil then
-		return false
-	end
-	-- check if the required resources are available
-	local Morphite = self.Link:RetrieveResource( "morphite", costs.Morphite )
-	local Nocxium = self.Link:RetrieveResource( "nocxium", costs.Nocxium )
-	local Isogen = self.Link:RetrieveResource( "isogen", costs.Isogen )
-	if ( costs.Morphite <= Morphite and costs.Nocxium <= Nocxium and costs.Isogen <= Isogen ) then
-		-- consume resources
-		return true
-	end
-	-- put resources back
-	self.Link:StoreResource( "morphite", Morphite)
-	self.Link:StoreResource( "nocxium", Nocxium)
-	self.Link:StoreResource( "isogen", Isogen)
-	return false 	
-end
-
 function ENT:BuildItem( productName )
 	local sufficient = false
 	self.Item = nil
@@ -141,6 +161,7 @@ function ENT:BuildItem( productName )
 	end
 	sufficient = self:CheckResources( Entry.Costs )
 	if sufficient then
+		self:ConsumeRequirements( Entry.Costs )
 		self.Item = self:BeginReplication( Entry.ClassName )
 		return "Replicating..." 
 	else
