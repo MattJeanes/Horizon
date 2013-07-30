@@ -36,7 +36,9 @@ end
 function ENT:RemoveDevice( ent )
 	self.connectedDevices[ent] = false
 	ent.Link = nil
-	constraint.RemoveConstraints( ent, "Rope" )
+	if( IsValid( ent:GetPhysicsObject() ) ) then
+		constraint.RemoveConstraints( ent, "Rope" )
+	end
 end
 
 -- Remove all devices from this link_hub

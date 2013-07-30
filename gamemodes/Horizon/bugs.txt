@@ -1,3 +1,4 @@
 known bugs and todos:
 
-* link hubs not interconnectable
+* link hubs not interconnectable (not an issue, but a missing feature)
+* take a look at the thinkrates etc

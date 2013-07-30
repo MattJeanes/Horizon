@@ -17,6 +17,7 @@ function ENT:Initialize()
 	self:SetUseType( ONOFF_USE )
 	-- resource stuff
 	self:RegisterConsumedResource( "energy", 60)
+	self.LastResourceDrop = 0
 	self.ResourceRate = 5
 	--animation timing stuff
 	self.AnimTime = 0
@@ -76,7 +77,7 @@ function ENT:SpawnOre()
 	if self.CurrentEnv.dt.Minerals == 1 then
 		ent = ents.Create("morphite_ore")
 	end
-	if ent == nil then return nil end
+	if ent == nil then return end
 	-- determine position
 	local x = math.random() * 128 - 64
 	local y = math.random() * 128 - 64
@@ -86,14 +87,19 @@ function ENT:SpawnOre()
 	local phys = ent:GetPhysicsObject()
 	if (phys:IsValid()) then
 		phys:Wake()
-		return ent
+		return
 	end	
 	ent:Remove()
-	return nil
+	return
 end
 
 function ENT:CanOperate()
-	if self.CurrentEnv == nil then
+	local tracedata = {}
+		tracedata.start = self:GetPos()
+		tracedata.endpos = ( self:GetPos() + Vector(0,0,-25) )
+		tracedata.filter = self
+	local trace = util.TraceLine( tracedata )
+	if self.CurrentEnv == nil or not trace.HitWorld then
 		self:Off()
 		return false
 	end
@@ -107,9 +113,10 @@ function ENT:Execute()
 		self:Idle()
 		return
 	end
-	-- check rates and ground
-	if self.LastThink + self.ResourceRate > CurTime() and self:OnGround() then
+	-- check rates
+	if self.LastResourceDrop + self.ResourceRate < CurTime() then
 		self:SpawnOre()
+		self.LastResourceDrop = CurTime()
 		return
 	end
 end
