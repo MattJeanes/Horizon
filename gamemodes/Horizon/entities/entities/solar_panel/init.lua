@@ -24,18 +24,18 @@ function ENT:Initialize()
 end
 
 function ENT:ReceivesLight()
+	local sun = GAMEMODE:GetSun()
 	local tracedata = {}
-	tracedata.start = GAMEMODE:GetSun():GetPos()
-	tracedata.endpos = self:GetPos()
-	tracedata.filter = self
+		tracedata.start = self:GetPos()
+		tracedata.endpos = sun:GetPos()
+		tracedata.filter = { self, sun }
 	local trace = util.TraceLine(tracedata)
-	if trace.Hit then return (trace.Entity:GetClass() == "solar_panel")	end
-	return false
+	return not trace.Hit
 end
 
 function ENT:CanOperate()
-	--return self:ReceivesLight()
-	return true
+	return self:ReceivesLight()
+	--return true
 end
 
 function ENT:Failed()

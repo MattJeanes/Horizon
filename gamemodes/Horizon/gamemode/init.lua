@@ -31,7 +31,7 @@ end
 
 -- Sets the environment of the given entity to the new environment if its priority is higher
 function GM:SetEnvironment( entity, newEnv )
-	if entity.CurrentEnv == nil then
+	if entity.CurrentEnv == nil or entity.CurrentEnv.dt == nil then
 		entity.CurrentEnv = newEnv
 		self:AdjustGravity(entity, newEnv.dt.Gravity)
 		return
@@ -162,7 +162,7 @@ function GM:PlayerThink( ply )
 	if not ply:Alive() then return end
 	local dmg = 0
 	local env = ply.CurrentEnv
-	if env == nil then
+	if env == nil or env.dt == nil then
 		if ply.SuitAir > 0		then ply.SuitAir		= ply.SuitAir - 1	else dmg = dmg + 10 end
 		if ply.SuitPower > 0	then ply.SuitPower		= ply.SuitPower - 1 else dmg = dmg + 5 end
 	else

@@ -17,6 +17,7 @@ function ENT:Initialize()
 	self:SetUseType( ONOFF_USE )
 	-- resource stuff
 	self:RegisterConsumedResource( "energy", 50 )
+	self.Range = 512
 	-- check physics
     local phys = self:GetPhysicsObject()
 	if (phys:IsValid()) then
@@ -44,6 +45,17 @@ function ENT:On()
 	self.Active = true
 	local sequence = self:LookupSequence("deploy")
 	self:ResetSequence(sequence)
+	--
+	self.GravEnv = ents.Create( "hzn_environment" )
+	self.GravEnv:SetParent( self )
+	self.GravEnv:SetPos( self:GetPos() )
+	self.GravEnv.dt.Priority = 0
+	self.GravEnv.dt.Gravity = 1
+	self.GravEnv.dt.Radius = 256
+	self.GravEnv.dt.Breathable = false
+	self.GravEnv.dt.Temp = 1
+	self.GravEnv.dt.Minerals = 0
+	self.GravEnv:Spawn()
 end
 
 function ENT:Off()
@@ -54,16 +66,24 @@ function ENT:Off()
 	self.Active = false
 	local sequence = self:LookupSequence("retract")
 	self:ResetSequence(sequence)	
+	--
+	self.GravEnv:Remove()
+	self.GravEnv = nil
 end
-
 
 function ENT:CanOperate()
 	return true
 end
 
 function ENT:Execute()
-	-- TODO: set gravity of objects in self.Range
-	print( "gravity_generator: functionality not yet implemented." )
+	if self.CurrentEnv == nil or self.CurrentEnv.dt == nil then
+		self.GravEnv.dt.Breathable = false
+		self.GravEnv.dt.Temp = 0
+	else
+		self.GravEnv.dt.Breathable = self.CurrentEnv.dt.Breathable
+		self.GravEnv.dt.Temp = self.CurrentEnv.dt.Temp
+	end
+	self.GravEnv:SetPos( self:GetPos() )
 end
 
 function ENT:Failed()
@@ -71,9 +91,10 @@ function ENT:Failed()
 end
 
 function ENT:OnRemove()
-	if self.Active then
-		self.Entity:StopSound( "apc_engine_start" )
-		self.Entity:EmitSound( "apc_engine_stop" )
-		self.Entity:EmitSound( "npc/turret_floor/retract.wav" )
-	end
+	self:Off()
+	-- if self.Active then
+		-- self.Entity:StopSound( "apc_engine_start" )
+		-- self.Entity:EmitSound( "apc_engine_stop" )
+		-- self.Entity:EmitSound( "npc/turret_floor/retract.wav" )
+	-- end
 end
