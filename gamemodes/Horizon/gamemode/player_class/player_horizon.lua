@@ -5,11 +5,11 @@ DEFINE_BASECLASS( "player_sandbox" )
 local PLAYER = {} 
 
 -- Suit values
-PLAYER.MaxSuitPower			= 200
+PLAYER.MaxSuitPower			= 100
 PLAYER.SuitPower 			= 10
-PLAYER.MaxSuitAir			= 200
+PLAYER.MaxSuitAir			= 100
 PLAYER.SuitAir				= 10
-PLAYER.MaxSuitCoolant		= 200
+PLAYER.MaxSuitCoolant		= 100
 PLAYER.SuitCoolant			= 10
 -- Environment values
 PLAYER.CurrentEnv = nil
@@ -19,52 +19,21 @@ function PLAYER:Init()
 	self.Player.SuitPower		= PLAYER.SuitPower
 	self.Player.SuitAir			= PLAYER.SuitAir
 	self.Player.SuitCoolant		= PLAYER.SuitCoolant
-	self.Player.SuitAirLast		= self.Player.SuitAir
-	self.Player.SuitCoolantLast	= self.Player.SuitCoolant
-	self.Player.SuitPowerLast	= self.Player.SuitPower
+	self.Player.SuitAirLast		= 0
+	self.Player.SuitCoolantLast	= 0
+	self.Player.SuitPowerLast	= 0
 	self.Player.CurrentEnv		= PLAYER.CurrentEnv
 	self.Player.Habitable		= PLAYER.Habitable
 end
 
--- Getters and Setters for Suit
-
-function PLAYER:GetSuitPower()
-	return self.Player.SuitPower
-end
-
-function PLAYER:GetSuitAir()
-	return self.Player.SuitAir
-end
-
-function PLAYER:GetSuitCoolant()
-	return self.Player.SuitCoolant
-end
-
-function PLAYER:SetSuitPower( amount )
-	amount = math.abs( amount )
-	if amount > PLAYER.MaxSuitPower then amount = PLAYER.MaxSuitPower end
-	self.Player.SuitPower = amount
-end
-
-function PLAYER:SetSuitAir( amount )
-	amount = math.abs( amount )
-	if amount > PLAYER.MaxSuitAir then amount = PLAYER.MaxSuitAir end
-	self.Player.SuitAir = amount
-end
-
-function PLAYER:SetSuitCoolant( amount )
-	amount = math.abs( amount )
-	if amount > PLAYER.MaxSuitCoolant then amount = PLAYER.MaxSuitCoolant end
-	self.Player.SuitCoolant = amount
-end
-
 function PLAYER:TransmitResources( energy, air, coolant )
-	self:SetSuitAir( self:GetSuitAir() + air )
-	self:SetSuitPower( self:GetSuitPower() + energy )
-	self:SetSuitCoolant( self:GetSuitCoolant() + coolant )
+	self.Player.SuitAir = self.Player.SuitAir + math.abs( air )
+	self.Player.SuitPower = self.Player.SuitPower + math.abs( energy )
+	self.Player.SuitCoolant = self.Player.SuitCoolant + math.abs( coolant )
+	if self.Player.SuitAir > self.MaxSuitAir then self.Player.SuitAir = self.MaxSuitAir end
+	if self.Player.SuitPower > self.MaxSuitPower then self.Player.SuitPower = self.MaxSuitPower end
+	if self.Player.SuitCoolant > self.MaxSuitCoolant then self.Player.SuitCoolant = self.MaxSuitCoolant end
 end
-
--- Getters and Setter -- END
 
 -- Sends suit updates to the clients
 local function onPlayerSuitUpdate()
