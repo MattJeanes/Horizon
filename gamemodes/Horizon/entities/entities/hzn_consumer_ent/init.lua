@@ -7,8 +7,6 @@ function ENT:Initialize()
 	self.Link = nil
 	self.Active = false
 	self.DeviceType = "support"
-	self.LastThink = 0
-	self.ThinkRate = 1
 	-- consumed resources
 	self.ConsumedResources = {}
 	self.ConsumedResourceRates = {}
@@ -26,44 +24,43 @@ function ENT:DeregisterConsumedResource( resName )
 	self.ConsumedResourceRates[resName] = nil
 end
 
-function ENT:RequirementsAvailable()
+function ENT:RequirementsAvailable( FTime )
 	local cond = true
 	for resName, c in pairs( self.ConsumedResources ) do
 		if c then
-			local a = self.Link:RetrieveResource( resName, self.ConsumedResourceRates[resName] )
-			cond = cond and (a >= self.ConsumedResourceRates[resName])
+			local a = self.Link:RetrieveResource( resName, self.ConsumedResourceRates[resName] * FTime )
+			cond = cond and (a >= self.ConsumedResourceRates[resName] * FTime )
 			self.Link:StoreResource( resName, a )
 		end
 	end
 	return cond
 end
 
-function ENT:ConsumeResources()
+function ENT:ConsumeResources( FTime )
 	for resName, c in pairs( self.ConsumedResources ) do
 		if c then
-			self.Link:RetrieveResource( resName, self.ConsumedResourceRates[resName] )
+			self.Link:RetrieveResource( resName, self.ConsumedResourceRates[resName] * FTime )
 		end
 	end
 end
 
 function ENT:Think()
-	--self.BaseClass.Think( self )
 	-- schedule next think
 	local CTime = CurTime()
+	local FTime = FrameTime()
 	self.Entity:NextThink( CTime )
-	if self.LastThink + self.ThinkRate > CTime then return end
-	self.LastThink = CTime
 	self:netUpdate()
 	-- check individual requirements
-	if not self.Active or self.Link == nil then return end
-	if not self:CanOperate() then return end
+	if not self.Active or self.Link == nil then return true end
+	if not self:CanOperate() then return true end
 	-- check if requirements are met
-	if self:RequirementsAvailable() then
-		self:ConsumeResources()
+	if self:RequirementsAvailable( FTime ) then
+		self:ConsumeResources( FTime )
 		self:Execute()
 		return true
 	end
 	self:Failed()
+	return true
 end
 
 function ENT:CanOperate() return false end

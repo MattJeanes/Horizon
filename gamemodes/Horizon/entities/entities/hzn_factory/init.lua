@@ -17,7 +17,7 @@ function ENT:Initialize()
 	self:SetSolid( SOLID_VPHYSICS )
 	self:SetUseType( SIMPLE_USE )
 	-- resource stuff
-	self:RegisterConsumedResource( "energy", 500)
+	self:RegisterConsumedResource( "energy", 50)
 	-- crate spawning timer and id
 	self.StartTime = 0
 	self.CrateID = 0
