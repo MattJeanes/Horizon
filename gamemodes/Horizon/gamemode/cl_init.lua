@@ -32,7 +32,7 @@ local cs = cs or 0
 local ps = ps or 0
 
 function GM:HUDPaint()
-	//Sandbox stuff.
+	-- Sandbox stuff.
 	if self.BaseClass then
 		self.BaseClass:HUDPaint()
 	end
