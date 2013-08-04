@@ -1,4 +1,4 @@
-"Horizon"
+"horizon"
 {
 	"base"		"base"
 	"title"		"Horizon"
