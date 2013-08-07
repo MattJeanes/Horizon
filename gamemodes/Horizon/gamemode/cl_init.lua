@@ -2,12 +2,6 @@ include('shared.lua')
 
 DEFINE_BASECLASS( "gamemode_sandbox" )
 
-local FactoryEntries = {}
-
-local Air = Air or 0
-local Coolant = Coolant or 0
-local Power = Power or 0
-
 surface.CreateFont( "PixelFont", {
 	font 		= "04b03",
 	size 		= 8,
@@ -25,11 +19,52 @@ surface.CreateFont( "PixelFont", {
 	outline 	= false
 } )
 
-local hps = hps or 0
-local aps = aps or 0
-local as = as or 0
-local cs = cs or 0
-local ps = ps or 0
+local FactoryEntries = {}
+
+-- available resources
+local SuitValues = {}
+	SuitValues['coolant'] = {}
+		SuitValues['coolant'].DisplayName = "Coolant"
+		SuitValues['coolant'].DisplayFont = "PixelFont"
+		SuitValues['coolant'].DisplayColor = Color( 0, 153, 204, 255 )
+		SuitValues['coolant'].Amount = 0
+		SuitValues['coolant'].MaxAmount = 200
+	SuitValues['air'] = {}
+		SuitValues['air'].DisplayName = "Air"
+		SuitValues['air'].DisplayFont = "PixelFont"
+		SuitValues['air'].DisplayColor = Color( 0, 204, 0, 255 )
+		SuitValues['air'].Amount = 0
+		SuitValues['air'].MaxAmount = 200
+	SuitValues['energy'] = {}
+		SuitValues['energy'].DisplayName = "Energy"
+		SuitValues['energy'].DisplayFont = "PixelFont"
+		SuitValues['energy'].DisplayColor = Color( 255, 205, 0, 255 )
+		SuitValues['energy'].Amount = 0
+		SuitValues['energy'].MaxAmount = 200
+--
+local PlayerValues = {}
+	PlayerValues['armor'] = {}
+		PlayerValues['armor'].DisplayName = "Armor"
+		PlayerValues['armor'].DisplayFont = "PixelFont"
+		PlayerValues['armor'].DisplayColor = Color( 255, 128, 0, 255 )
+		PlayerValues['armor'].Amount = 0
+		PlayerValues['armor'].MaxAmount = 100
+	PlayerValues['health'] = {}
+		PlayerValues['health'].DisplayName = "Health"
+		PlayerValues['health'].DisplayFont = "PixelFont"
+		PlayerValues['health'].DisplayColor = Color( 231, 17, 21, 255 )
+		PlayerValues['health'].Amount = 100
+		PlayerValues['health'].MaxAmount = 100
+--
+
+local x_size = 256
+local y_size = 128
+local x_offset = 5
+local y_offset = 5
+local TextColor = Color( 255, 255, 255, 100)
+local BarMaterial = Material("Horizon/grad.png")
+local border_size = 22
+local bar_height = 14
 
 function GM:HUDPaint()
 	-- Sandbox stuff.
@@ -40,77 +75,65 @@ function GM:HUDPaint()
 	local ply = LocalPlayer()
 	local X = ScrW()
 	local Y = ScrH()
-
-	local health = math.Clamp(ply:Health(), 0, 100)   -- clamps the health to [0, 100] meaning it will not go above 100 or below 0
-    hps = math.Approach(hps, health, 50*FrameTime())
-    local hpequation = (212)*(hps/100)
-
-	local armor = math.Clamp(ply:Armor(), 0, 100)   -- clamps the health to [0, 100] meaning it will not go above 100 or below 0
-    aps = math.Approach(aps, armor, 50*FrameTime())
-    local apequation = (212)*(aps/100)
-
+	PlayerValues['health'].Amount = ply:Health()
+	PlayerValues['armor'].Amount = ply:Armor()
 	-- Left corner
+	local x_pos = x_offset
+	local y_pos = Y - ( y_size + y_offset )
 	surface.SetDrawColor( 255, 255, 255, 255 ) 
 	surface.SetMaterial( Material("Horizon/corner_left.png") )
-	surface.DrawTexturedRect( 5, Y-133, 256, 128 )	
-	--Armor
-	surface.SetDrawColor( 255, 128, 0, 255 ) 
-	surface.SetMaterial( Material("Horizon/grad.png") )
-	surface.DrawTexturedRect( 37, Y-27, apequation, 14 )	
-	-- Health
-	surface.SetDrawColor( 231, 17, 21, 255 ) 
-	surface.SetMaterial( Material("Horizon/grad.png") )
-	surface.DrawTexturedRect( 37, Y-50, hpequation, 14 )
+	surface.DrawTexturedRect( x_pos, y_pos, x_size, y_size )
+	--
+	local c = 0
+	local bar_xpos = 37
+	-- loop
+	for k, v in pairs( PlayerValues ) do
+		surface.SetDrawColor( v.DisplayColor ) 
+		surface.SetMaterial( BarMaterial )
+		c = c + 1
+		local bar_ypos = (y_pos + y_size) - ( c * 22 )
+		local ratio = math.Clamp( v.Amount, 0, v.MaxAmount ) / v.MaxAmount
+		local bar_length = ( x_size - border_size * 2 ) * ratio
+		surface.DrawTexturedRect( bar_xpos, bar_ypos, bar_length, bar_height )
+		draw.SimpleText( v.DisplayName, v.DisplayFont, border_size * 2, Y - border_size * c, TextColor, TEXT_ALIGN_LEFT, TEXT_ALIGN_LEFT)
+	end
 	-- Nickname
 	draw.SimpleText( ply:Nick(), "DermaDefaultBold", 37, Y - 72, Color( 0, 0, 0, 255), TEXT_ALIGN_LEFT, TEXT_ALIGN_LEFT)
 	draw.SimpleText( ply:Nick(), "DermaDefaultBold", 36, Y - 73, Color( 255, 255, 255, 255), TEXT_ALIGN_LEFT, TEXT_ALIGN_LEFT)
 
 	-- Right corner
-	local power = math.Clamp(Power, 0, 200)
-    ps = math.Approach(ps, power, 50*FrameTime())
-    local psequation = (212)*(ps/200)
-
-	local air = math.Clamp(Air, 0, 200)
-    as = math.Approach(as, air, 50*FrameTime())
-    local asequation = (212)*(as/200)
-
-	local coolant = math.Clamp(Coolant, 0, 200)
-    cs = math.Approach(cs, coolant, 50*FrameTime())
-    local csequation = (212)*(cs/200)
-
 	surface.SetDrawColor( 255, 255, 255, 255 ) 
 	surface.SetMaterial( Material("Horizon/corner_right.png") )
-	surface.DrawTexturedRect( ScrW()-261, Y-133, 256, 128 )
-	-- Power
-	surface.SetDrawColor( 255, 205, 0, 255 ) 
-	surface.SetMaterial( Material("Horizon/grad.png") )
-	surface.DrawTexturedRect( ScrW()-249, Y-73, psequation, 14 )
-	-- Air
-	surface.SetDrawColor( 0, 204, 0, 255 ) 
-	surface.SetMaterial( Material("Horizon/grad.png") )
-	surface.DrawTexturedRect( ScrW()-249, Y-50, asequation, 14 )
-	-- Coolant
-	surface.SetDrawColor( 0, 153, 204, 255 ) 
-	surface.SetMaterial( Material("Horizon/grad.png") )
-	surface.DrawTexturedRect( ScrW()-249, Y-27, csequation, 14 )
-
-	draw.SimpleText( "Energy", "PixelFont", ScrW()-41, Y - 69, Color( 255, 255, 255, 100), TEXT_ALIGN_RIGHT, TEXT_ALIGN_RIGHT)
-	draw.SimpleText( "Air", "PixelFont", ScrW()-41, Y - 46, Color( 255, 255, 255, 100), TEXT_ALIGN_RIGHT, TEXT_ALIGN_RIGHT)
-	draw.SimpleText( "Coolant", "PixelFont", ScrW()-41, Y - 23, Color( 255, 255, 255, 100), TEXT_ALIGN_RIGHT, TEXT_ALIGN_RIGHT)
-	draw.SimpleText( "Health", "PixelFont", 41, Y - 46, Color( 255, 255, 255, 100), TEXT_ALIGN_LEFT, TEXT_ALIGN_LEFT)
-	draw.SimpleText( "Armor", "PixelFont", 41, Y - 23, Color( 255, 255, 255, 100), TEXT_ALIGN_LEFT, TEXT_ALIGN_LEFT)
-
+	local x_pos = X - ( x_size + x_offset )
+	local y_pos = Y - ( y_size + y_offset )
+	surface.DrawTexturedRect( x_pos, y_pos, x_size, y_size )
+	--
+	local bar_xpos = x_pos + 12
+	local c = 0
+	for k, v in pairs( SuitValues ) do
+		surface.SetDrawColor( v.DisplayColor ) 
+		surface.SetMaterial( BarMaterial )
+		c = c + 1
+		local ratio = math.Clamp( v.Amount, 0, v.MaxAmount ) / v.MaxAmount
+		local bar_length = ( x_size - border_size * 2 ) * ratio
+		local bar_ypos = ( y_pos + y_size ) - ( c * 23 )
+		surface.DrawTexturedRect( bar_xpos, bar_ypos, bar_length, bar_height )
+		draw.SimpleText( v.DisplayName, v.DisplayFont, X - ( x_offset + border_size * 2), bar_ypos + 3, TextColor, TEXT_ALIGN_RIGHT, TEXT_ALIGN_RIGHT)
+	end
 end
 
 function GM:HUDShouldDraw(name)
 	return not ( name == 'CHudHealth' || name == 'CHudBattery' || name == 'CHudAmmo' ||	name == 'CHudSecondaryAmmo' )
 end
 
+-- TODO: modify hznSuit to transmit a table instead?
 net.Receive('hznSuit', function()
-	Air = net.ReadUInt(8)
-	Coolant = net.ReadUInt(8)
-	Power = net.ReadUInt(8)
+	SuitValues['air'].Amount = net.ReadUInt(8)
+	SuitValues['coolant'].Amount = net.ReadUInt(8)
+	SuitValues['energy'].Amount = net.ReadUInt(8)
 end)
+
+-- Factory / Replicator related fields
 
 function GM:RegisterFactoryEntry( FactoryEntry )
 	FactoryEntries[FactoryEntry.DisplayName] = FactoryEntry

@@ -91,7 +91,8 @@ end
 function GM:PlayerSpawn( ply )
 	self.BaseClass:PlayerSpawn( ply )
 	player_manager.SetPlayerClass( ply, "player_horizon" )
-	player_manager.RunClass(ply, "netUpdate", ply)
+	player_manager.RunClass(ply, "Init")
+	--player_manager.RunClass(ply, "netUpdate", ply)
 end
 
 -- Hurts the given player
@@ -157,33 +158,6 @@ function GM:OnEntityCreated( ent )
 	end
 end
 
--- Checks if the player should take damage or not
-function GM:PlayerThink( ply )
-	if not ply:Alive() then return end
-	local dmg = 0
-	local env = ply.CurrentEnv
-	if env == nil or env.dt == nil then
-		if ply.SuitAir > 0		then ply.SuitAir		= ply.SuitAir - 1	else dmg = dmg + 10 end
-		if ply.SuitPower > 0	then ply.SuitPower		= ply.SuitPower - 1 else dmg = dmg + 5 end
-	else
-		-- Update air reserves
-		if not env.dt.Breathable then			
-			if ply.SuitAir > 0 then ply.SuitAir = ply.SuitAir - 1 else dmg = dmg + 10 end
-		end
-		-- Update coolant reserves
-		if temps[env.dt.Temp] == temps[3] then
-			if ply.SuitCoolant > 0 then	ply.SuitCoolant = ply.SuitCoolant - 1 else dmg = dmg + 5 end
-		end
-		-- Update power reserves
-		if temps[env.dt.Temp] == temps[1] then
-			if ply.SuitPower > 0 then ply.SuitPower = ply.SuitPower - 1	else dmg = dmg + 5 end
-		end
-	end
-	if dmg > 0 then
-		self:HurtPlayer( ply, dmg )
-	end
-end
-
 -- Called every gamemode tick
 function GM:Tick()
 	local CurrentTime = CurTime()
@@ -198,13 +172,9 @@ function GM:Tick()
 		self:SpawnAsteroid()
 		LastAsteroidSpawn = CurrentTime
 	end
-	-- Think on players
-	for _, ply in pairs( player.GetAll() ) do
-		if ply:IsValid() and ply:IsPlayer() then 
-			self:PlayerThink( ply )
-		end
-	end
 end
+
+-- Factory / Replicator related methods
 
 -- Returns a list of items available in the factory
 function GM:GetFactoryEntries()
@@ -215,3 +185,55 @@ end
 function GM:RegisterFactoryEntry( FactoryEntry )
 	FactoryEntries[FactoryEntry.DisplayName] = FactoryEntry
 end
+
+-- Hooks
+
+-- 'Think' hook used to check if players should take damage or not
+local function onPlayerThink( ply )
+	local FTime = FrameTime()
+	for k, ply in pairs( player.GetAll() ) do
+		if ply:IsValid() and ply:IsPlayer() and ply:Alive() then
+			local dmg = 0
+			local env = ply.CurrentEnv
+			if env == nil or env.dt == nil then
+				if ply.SuitAir > 0		then ply.SuitAir		= ply.SuitAir - 1 * FTime	else dmg = dmg + 10 * FTime end
+				if ply.SuitPower > 0	then ply.SuitPower		= ply.SuitPower - 1 * FTime else dmg = dmg + 5 * FTime end
+			else
+				-- Update air reserves
+				if not env.dt.Breathable then			
+					if ply.SuitAir > 0 then ply.SuitAir = ply.SuitAir - 1 * FTime else dmg = dmg + 10 * FTime end
+				end
+				-- Update coolant reserves
+				if temps[env.dt.Temp] == temps[3] then
+					if ply.SuitCoolant > 0 then	ply.SuitCoolant = ply.SuitCoolant - 1 * FTime else dmg = dmg + 5 * FTime end
+				end
+				-- Update power reserves
+				if temps[env.dt.Temp] == temps[1] then
+					if ply.SuitPower > 0 then ply.SuitPower = ply.SuitPower - 1	* FTime else dmg = dmg + 5 * FTime end
+				end
+			end
+			if dmg > 0 then
+				GAMEMODE:HurtPlayer( ply, dmg )
+			end
+		end
+	end
+end
+hook.Add( "Think", "PlayerThink", onPlayerThink )
+
+-- 'Think' hook used to send suit updates to the clients
+local function onPlayerSuitUpdate()
+	for k, v in pairs( player.GetAll() ) do
+		if ( ( v.SuitAir != v.SuitAirLast or v.SuitCoolant != v.SuitCoolantLast or v.SuitPower != v.SuitPowerLast ) and v:Alive() ) then
+			v.SuitAirLast		= v.SuitAir
+			v.SuitCoolantLast	= v.SuitCoolant
+			v.SuitPowerLast		= v.SuitPower
+			-- send info
+			net.Start('hznSuit')
+				net.WriteUInt( v.SuitAir, 8 )
+				net.WriteUInt( v.SuitCoolant, 8 )
+				net.WriteUInt( v.SuitPower, 8 )
+			net.Send( v )
+		end
+	end
+end
+hook.Add( "Think", "PlayerSuitUpdate", onPlayerSuitUpdate )

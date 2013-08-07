@@ -5,17 +5,18 @@ DEFINE_BASECLASS( "player_sandbox" )
 local PLAYER = {} 
 
 -- Suit values
-PLAYER.MaxSuitPower			= 100
+PLAYER.MaxSuitPower			= 200
 PLAYER.SuitPower 			= 10
-PLAYER.MaxSuitAir			= 100
+PLAYER.MaxSuitAir			= 200
 PLAYER.SuitAir				= 10
-PLAYER.MaxSuitCoolant		= 100
+PLAYER.MaxSuitCoolant		= 200
 PLAYER.SuitCoolant			= 10
 -- Environment values
 PLAYER.CurrentEnv = nil
 
 -- Called when the class object is created (shared)
 function PLAYER:Init()
+	BaseClass:Init()
 	self.Player.SuitPower		= PLAYER.SuitPower
 	self.Player.SuitAir			= PLAYER.SuitAir
 	self.Player.SuitCoolant		= PLAYER.SuitCoolant
@@ -34,24 +35,6 @@ function PLAYER:TransmitResources( energy, air, coolant )
 	if self.Player.SuitPower > self.MaxSuitPower then self.Player.SuitPower = self.MaxSuitPower end
 	if self.Player.SuitCoolant > self.MaxSuitCoolant then self.Player.SuitCoolant = self.MaxSuitCoolant end
 end
-
--- Sends suit updates to the clients
-local function onPlayerSuitUpdate()
-	for k, v in pairs( player.GetAll() ) do
-		if ( v.SuitAir != v.SuitAirLast or v.SuitCoolant != v.SuitCoolantLast or v.SuitPower != v.SuitPowerLast ) then
-			v.SuitAirLast		= v.SuitAir
-			v.SuitCoolantLast	= v.SuitCoolant
-			v.SuitPowerLast		= v.SuitPower
-			-- send info
-			net.Start('hznSuit')
-				net.WriteUInt( v.SuitAir, 8 )
-				net.WriteUInt( v.SuitCoolant, 8 )
-				net.WriteUInt(v.SuitPower, 8 )
-			net.Send( v )
-		end
-	end
-end
-hook.Add( "Think", "PlayerSuitUpdate", onPlayerSuitUpdate )
 
 -- Set up the network table accessors
 function PLAYER:SetupDataTables()
