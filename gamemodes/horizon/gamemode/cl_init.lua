@@ -2,9 +2,12 @@ include('shared.lua')
 
 DEFINE_BASECLASS( "gamemode_sandbox" )
 
+local font_size = 24
+
 surface.CreateFont( "PixelFont", {
-	font 		= "04b03",
-	size 		= 8,
+	--font 		= "04b03",
+	font		= "Arial",
+	size 		= font_size,
 	weight 		= 0,
 	blursize 	= 0,
 	scanlines 	= 0,
@@ -20,6 +23,9 @@ surface.CreateFont( "PixelFont", {
 } )
 
 local FactoryEntries = {}
+
+local TextColor = Color( 255, 255, 255, 100)
+local BarMaterial = Material("Horizon/grad.png")
 
 -- available resources
 local SuitValues = {}
@@ -57,68 +63,60 @@ local PlayerValues = {}
 		PlayerValues['health'].MaxAmount = 100
 --
 
-local x_size = 256
-local y_size = 128
-local x_offset = 5
-local y_offset = 5
-local TextColor = Color( 255, 255, 255, 100)
-local BarMaterial = Material("Horizon/grad.png")
-local border_size = 22
-local bar_height = 14
+-- Draws a bar at the given coordinates
+function GM:DrawBar( x, y, w, h, info )
+	surface.SetDrawColor( info.DisplayColor ) 
+	surface.SetMaterial( BarMaterial )
+	local ratio = math.Clamp( info.Amount, 0, info.MaxAmount ) / info.MaxAmount
+	surface.DrawTexturedRect( x, y, w * ratio, h )
+	local x_offset = 8
+	local y_offset = 8
+	draw.SimpleText( info.DisplayName, info.DisplayFont, x + x_offset, y + y_offset, TextColor, TEXT_ALIGN_LEFT, TEXT_ALIGN_LEFT)	
+end
+
+-- Draws the given table at position (x,y)
+function GM:DrawPanel( x, y, w, h, tab )
+	surface.SetDrawColor( 128, 128, 128, 255 ) 
+	surface.SetMaterial( BarMaterial )
+	surface.DrawTexturedRect( x, y, w, h )
+	local x_offset = 8
+	local y_offset = 8
+	local step_size = h / table.Count( tab )
+	-- determine starting pos of list
+	local start_y = y + h - step_size
+	for k, v in pairs( tab ) do
+		self:DrawBar( x + x_offset, start_y, w - 2 * x_offset, step_size - 2 * y_offset, v )
+		start_y = start_y - (step_size - 2 * y_offset)
+	end
+end
 
 function GM:HUDPaint()
 	-- Sandbox stuff.
-	if self.BaseClass then
-		self.BaseClass:HUDPaint()
-	end
-	
+	if self.BaseClass then self.BaseClass:HUDPaint() end
+	-- update player values
 	local ply = LocalPlayer()
-	local X = ScrW()
-	local Y = ScrH()
 	PlayerValues['health'].Amount = ply:Health()
 	PlayerValues['armor'].Amount = ply:Armor()
-	-- Left corner
-	local x_pos = x_offset
-	local y_pos = Y - ( y_size + y_offset )
-	surface.SetDrawColor( 255, 255, 255, 255 ) 
-	surface.SetMaterial( Material("Horizon/corner_left.png") )
-	surface.DrawTexturedRect( x_pos, y_pos, x_size, y_size )
-	--
-	local c = 0
-	local bar_xpos = 37
-	-- loop
-	for k, v in pairs( PlayerValues ) do
-		surface.SetDrawColor( v.DisplayColor ) 
-		surface.SetMaterial( BarMaterial )
-		c = c + 1
-		local bar_ypos = (y_pos + y_size) - ( c * 22 )
-		local ratio = math.Clamp( v.Amount, 0, v.MaxAmount ) / v.MaxAmount
-		local bar_length = ( x_size - border_size * 2 ) * ratio
-		surface.DrawTexturedRect( bar_xpos, bar_ypos, bar_length, bar_height )
-		draw.SimpleText( v.DisplayName, v.DisplayFont, border_size * 2, Y - border_size * c, TextColor, TEXT_ALIGN_LEFT, TEXT_ALIGN_LEFT)
-	end
-	-- Nickname
-	draw.SimpleText( ply:Nick(), "DermaDefaultBold", 37, Y - 72, Color( 0, 0, 0, 255), TEXT_ALIGN_LEFT, TEXT_ALIGN_LEFT)
-	draw.SimpleText( ply:Nick(), "DermaDefaultBold", 36, Y - 73, Color( 255, 255, 255, 255), TEXT_ALIGN_LEFT, TEXT_ALIGN_LEFT)
+	-- how much space to leave out
+	local x_offset = 8
+	local y_offset = 8
+	self:DrawTable( x_offset, ScrH() - y_offset, TEXT_ALIGN_LEFT, PlayerValues )
+	self:DrawTable( ScrW() - x_offset, ScrH() - y_offset, TEXT_ALIGN_RIGHT, SuitValues )
+	return
+end
 
-	-- Right corner
-	surface.SetDrawColor( 255, 255, 255, 255 ) 
-	surface.SetMaterial( Material("Horizon/corner_right.png") )
-	local x_pos = X - ( x_size + x_offset )
-	local y_pos = Y - ( y_size + y_offset )
-	surface.DrawTexturedRect( x_pos, y_pos, x_size, y_size )
-	--
-	local bar_xpos = x_pos + 12
-	local c = 0
-	for k, v in pairs( SuitValues ) do
-		surface.SetDrawColor( v.DisplayColor ) 
-		surface.SetMaterial( BarMaterial )
+--
+--	(x,y) point to bottom left corner
+--
+function GM:DrawTable( x, y, align, tab )
+	local x_offset = 8
+	if align == TEXT_ALIGN_RIGHT then x_offset = -x_offset end
+	local y_offset = font_size
+	-- start printing entries to screen
+	local c = 1
+	for k, info in pairs( tab ) do
+		draw.SimpleText( info.DisplayName .. ": " .. info.Amount .. "/" .. info.MaxAmount, info.DisplayFont, x + x_offset, y - ( c * y_offset ), TextColor, align, align)
 		c = c + 1
-		local ratio = math.Clamp( v.Amount, 0, v.MaxAmount ) / v.MaxAmount
-		local bar_length = ( x_size - border_size * 2 ) * ratio
-		local bar_ypos = ( y_pos + y_size ) - ( c * 23 )
-		surface.DrawTexturedRect( bar_xpos, bar_ypos, bar_length, bar_height )
-		draw.SimpleText( v.DisplayName, v.DisplayFont, X - ( x_offset + border_size * 2), bar_ypos + 3, TextColor, TEXT_ALIGN_RIGHT, TEXT_ALIGN_RIGHT)
 	end
 end
 
