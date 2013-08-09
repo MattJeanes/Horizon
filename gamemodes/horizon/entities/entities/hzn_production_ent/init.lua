@@ -39,16 +39,12 @@ function ENT:DeregisterProducedResource( resName )
 	self.ProducedResourceRates[resName] = nil
 end
 
-function ENT:RequirementsAvailable( FTime )
-	local cond = true
-	for resName, c in pairs( self.ConsumedResources ) do
+function ENT:ProduceResources( FTime )
+	for resName, c in pairs( self.ProducedResources ) do
 		if c then
-			local a = self.Link:RetrieveResource( resName, self.ConsumedResourceRates[resName] * FTime )
-			cond = cond and (a >= self.ConsumedResourceRates[resName] * FTime )
-			self.Link:StoreResource( resName, a )
+			self.Link:StoreResource( resName, self.ProducedResourceRates[resName] * FTime )
 		end
 	end
-	return cond
 end
 
 function ENT:ConsumeResources( FTime )
@@ -59,12 +55,16 @@ function ENT:ConsumeResources( FTime )
 	end
 end
 
-function ENT:ProduceResources( FTime )
-	for resName, c in pairs( self.ProducedResources ) do
+function ENT:RequirementsAvailable( FTime )
+	local cond = true
+	for resName, c in pairs( self.ConsumedResources ) do
 		if c then
-			self.Link:StoreResource( resName, self.ProducedResourceRates[resName] * FTime )
+			local a = self.Link:RetrieveResource( resName, self.ConsumedResourceRates[resName] * FTime )
+			cond = cond and (a >= self.ConsumedResourceRates[resName] * FTime )
+			self.Link:StoreResource( resName, a )
 		end
 	end
+	return cond
 end
 
 function ENT:Think()
@@ -80,6 +80,7 @@ function ENT:Think()
 	if self:RequirementsAvailable( FTime ) then
 		self:ConsumeResources( FTime )
 		self:ProduceResources( FTime )
+		self:Execute()
 		return true
 	end
 	self:Failed()
@@ -87,6 +88,8 @@ function ENT:Think()
 end
 
 function ENT:CanOperate() return false end
+
+function ENT:Execute() return end
 
 function ENT:Failed() end
 
@@ -100,5 +103,3 @@ function ENT:netUpdate()
 		net.WriteTable( tab )
 	net.Broadcast()
 end
-
- 

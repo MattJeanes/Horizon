@@ -1,1 +1,1 @@
-ENT.Type = "anim"ENT.Base = "hzn_consumer_ent" ENT.PrintName		= "Equipment Factory"ENT.Author			= "Bynari" 
+ENT.Type = "anim"ENT.Base = "hzn_production_ent" ENT.PrintName		= "Equipment Factory"ENT.Author			= "Bynari" 

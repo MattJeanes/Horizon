@@ -1,1 +1,0 @@
-ENT.Type = "anim"ENT.Base = "hzn_base_ent" ENT.PrintName		= "Consumer Device"ENT.Author			= "LoRAWN"ENT.Purpose			= "Consumes Resources" 
