@@ -5,18 +5,6 @@ function ENT:Draw( )
 	if entID == nil then
 		entID = 0
 	end
-	if self.dispEnergy == nil then
-		self.dispEnergy = 0
-	end
-	if self.dispMorphite == nil then
-		self.dispMorphite = 0
-	end
-	if self.dispNocxium == nil then
-		self.dispNocxium = 0
-	end
-	if self.dispIsogen == nil then
-		self.dispIsogen = 0
-	end
 	self:DrawModel()
 end
 
@@ -26,90 +14,117 @@ function VGUI:Init()
 	-- get factory entries from gamemode
 	local entries = GAMEMODE:GetFactoryEntries()
 	-- create factory window
+	local frame_w, frame_h = 768, 512
 	local FactoryMenu = vgui.Create( "DFrame" )
-		FactoryMenu:SetPos( 50,50 )
-		FactoryMenu:SetSize( 550, 300 )
+		FactoryMenu:SetPos( 64, 64 )
+		FactoryMenu:SetSize( frame_w, frame_h )
 		FactoryMenu:SetTitle( "Horizon Factory" )
 		FactoryMenu:SetVisible( true )
 		FactoryMenu:SetDraggable( true )
 		FactoryMenu:ShowCloseButton( true )
 		FactoryMenu:MakePopup()
+	MainPanel = vgui.Create( "DPanel" )
+		MainPanel:SetParent( FactoryMenu )
+		MainPanel:SetPos( 1, 24 )
+		MainPanel:SetSize( FactoryMenu:GetWide() - 2, FactoryMenu:GetTall() - 26 )
+	ItemListPanel = vgui.Create( "DPanel" )
+		ItemListPanel:SetParent( MainPanel )
+		ItemListPanel:SetPos( 0, 0 )
+		ItemListPanel:SetSize( 192, MainPanel:GetTall() )
 	-- create available items scroll list
-	local schematicBox = vgui.Create("DListView")
-		schematicBox:SetParent( FactoryMenu )
-		schematicBox:SetPos(10, 35)
-		schematicBox:SetSize(150, 185)
-		schematicBox:SetMultiSelect(false)
-		schematicBox:AddColumn("Schematics") -- Add column
-	-- fill list with available items
-	for k, _ in pairs( entries ) do
-		schematicBox:AddLine( k )
-	end
-	-- create description box
-	local infoBox = vgui.Create( "DPanel", DermaFrame ) 
-		infoBox:SetPos( 170, 35 )
-		infoBox:SetSize( 350, 185)
-		infoBox:SetParent( FactoryMenu )
-		infoBox.Paint = function()    
-			surface.SetDrawColor( 50, 50, 50, 255 )
-			surface.DrawRect( 0, 0, infoBox:GetWide(), infoBox:GetTall() )
-			if schematicBox:GetSelected() and schematicBox:GetSelected()[1] then 
-				local selectedValue = schematicBox:GetSelected()[1]:GetValue(1) 
-				-- Get description data
-				if entries[selectedValue] == nil then 
-					itemDesc = { [1] = "No selection or selection does not have a description" }
-				else
-					itemDesc = entries[selectedValue].Description
-				end	
-				--surface.SetFont( "default" )
-				surface.SetTextColor( 255, 255, 255, 255 )
-				posy = 12
-				for _, textLine in pairs ( itemDesc ) do
-					surface.SetTextPos( 16, posy )
-					surface.DrawText( textLine )
-					posy = posy + 12
-				end
-				
-			end	
-			surface.SetTextColor( 255, 255, 255, 255 )
+	ItemList = vgui.Create("DListView")
+		ItemList:SetParent( ItemListPanel )
+		ItemList:SetPos( 0, 0 )
+		ItemList:SetSize( ItemListPanel:GetWide(), ItemListPanel:GetTall() )
+		ItemList:SetMultiSelect(false)
+		ItemList:AddColumn("Schematics") -- Add column
+		-- fill list with available items
+		for k, _ in pairs( entries ) do
+			ItemList:AddLine( k )
 		end
+		ItemList:SortByColumn( 1, false )
+		ItemList.OnRowSelected = function( panel, line )
+			item = panel:GetLine(line):GetValue(1)
+			local entry = entries[item]
+			-- TODO: clear other ListViews and refresh content
+			ItemNamePanel:Clear()
+			ItemNamePanel:AddLine( entry.DisplayName )
+			ItemDescriptionPanel:Clear()
+			for _, v in pairs( entry.Description ) do
+				ItemDescriptionPanel:AddLine( v )
+			end
+			ItemResourceList:Clear()
+			for k, v in pairs( entry.Costs ) do
+				ItemResourceList:AddLine( k, v )
+			end
+		end
+	ItemDetailPanel = vgui.Create( "DPanel" )
+		ItemDetailPanel:SetParent( MainPanel )
+		ItemDetailPanel:SetPos( ItemListPanel:GetWide(), 0 )
+		ItemDetailPanel:SetSize( MainPanel:GetWide() - ItemListPanel:GetWide(), MainPanel:GetTall() )
+	-- create item name box
+	ItemNamePanel = vgui.Create( "DListView", DermaFrame )
+		ItemNamePanel:SetParent( ItemDetailPanel )
+		ItemNamePanel:SetPos( 0, 0 )
+		ItemNamePanel:SetSize( ItemDetailPanel:GetWide(), 64 )
+		ItemNamePanel:AddColumn( "Name" )
+	-- create desciption box
+	ItemDescriptionPanel = vgui.Create( "DListView", DermaFrame )
+		ItemDescriptionPanel:SetMultiSelect( false )
+		ItemDescriptionPanel:SetParent( ItemDetailPanel )
+		ItemDescriptionPanel:SetPos( 0, ItemNamePanel:GetTall() )
+		ItemDescriptionPanel:SetSize( ItemDetailPanel:GetWide(), 256 )
+		ItemDescriptionPanel:AddColumn( "Description" )
+		ItemDescriptionPanel.Columns[1].DoClick = function() end 
+	-- create resource box
+	ItemResourceList = vgui.Create( "DListView", DermaFrame )
+		ItemResourceList:SetMultiSelect( false )
+		ItemResourceList:SetParent( ItemDetailPanel )
+		ItemResourceList:SetPos( 0, ItemNamePanel:GetTall() + ItemDescriptionPanel:GetTall() )
+		ItemResourceList:SetSize( ItemDetailPanel:GetWide(), 128 )
+		ItemResourceList:AddColumn( "Resource" )
+		ItemResourceList:AddColumn( "Amount" )
+	-- create button panel
+	ButtonsPanel = vgui.Create( "DPanel" )
+		ButtonsPanel:SetParent( ItemDetailPanel )
+		ButtonsPanel:SetPos( 0, ItemNamePanel:GetTall() + ItemDescriptionPanel:GetTall() + ItemResourceList:GetTall() )
+		ButtonsPanel:SetSize( ItemDetailPanel:GetWide(), ItemDetailPanel:GetTall() )
 	-- create cancel button
-	local cancelButton = vgui.Create( "DButton" )
-		cancelButton:SetParent( FactoryMenu ) -- Set parent to our "FactoryMenu"
+	cancelButton = vgui.Create( "DButton" )
+		cancelButton:SetParent( ButtonsPanel )
 		cancelButton:SetText( "Cancel" )
-		cancelButton:SetPos( 440, 250 )
-		cancelButton:SetSize( 90, 30 )
+		cancelButton:SetPos( 0, 0 )
+		cancelButton:SetSize( 128 + 64, 42 )
 		cancelButton.DoClick = function()
 			FactoryMenu:Remove()
 		end
 	-- create deposit button
-	local storageButton = vgui.Create( "DButton" )
-		storageButton:SetParent( FactoryMenu ) -- Set parent to our "FactoryMenu"
+	storageButton = vgui.Create( "DButton" )
+		storageButton:SetParent( ButtonsPanel )
 		storageButton:SetText( "Deposit Crate" )
-		storageButton:SetPos( 10, 250 )
-		storageButton:SetSize( 110, 30 )
+		storageButton:SetPos( ButtonsPanel:GetWide() / 3, 0 )
+		storageButton:SetSize( 128 + 64, 42 )
 		storageButton.DoClick = function ()
 			RunConsoleCommand("absorbcrate", entID)
 			FactoryMenu:Remove()
 		end
 	-- create build button
-	local okButton = vgui.Create( "DButton" )
-		okButton:SetParent( FactoryMenu ) -- Set parent to our "FactoryMenu"
-		okButton:SetText( "BUILD" )
-		okButton:SetPos( 340, 250 )
-		okButton:SetSize( 90, 30 )
+	okButton = vgui.Create( "DButton" )
+		okButton:SetParent( ButtonsPanel )
+		okButton:SetText( "Build" )
+		okButton:SetPos( ButtonsPanel:GetWide() * 2 / 3, 0 )
+		okButton:SetSize( 128 + 64, 42 )
 		okButton.DoClick = function ()
-			if schematicBox:GetSelected() and schematicBox:GetSelected()[1] then
-				RunConsoleCommand( "builditem", schematicBox:GetSelected()[1]:GetValue(1), entID  )
+			if ItemList:GetSelected() and ItemList:GetSelected()[1] then
+				RunConsoleCommand( "builditem", ItemList:GetSelected()[1]:GetValue(1), entID  )
 				FactoryMenu:Remove()
 			end
 		end
 end
 vgui.Register( "FactoryMenu", VGUI )
 
-function hznFactoryTrigger(um)
-
-	local Window = vgui.Create( "FactoryMenu")
+function hznFactoryTrigger( um )
+	local Window = vgui.Create( "FactoryMenu" )
 	Window:SetMouseInputEnabled( true )
 	Window:SetVisible( true )
 	

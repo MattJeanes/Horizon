@@ -1,5 +1,5 @@
 GM.Name		= "Horizon"
-GM.Author	= "Bynari"
+GM.Author	= "Bynari, LoRAWN"
 GM.Email	= ""
 GM.Website  = ""
 
