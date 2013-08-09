@@ -2,7 +2,6 @@ AddCSLuaFile( 'shared.lua' )
 AddCSLuaFile( 'cl_init.lua' )
 
 include('shared.lua')
-include('sv_resources.lua')
 
 DEFINE_BASECLASS( "gamemode_sandbox" )
 
