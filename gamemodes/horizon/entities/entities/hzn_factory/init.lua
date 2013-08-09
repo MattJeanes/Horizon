@@ -8,6 +8,9 @@ util.PrecacheSound( "k_lab.teleport_malfunction_sound" )
 util.PrecacheSound( "k_lab.teleport_discharge" )
 util.PrecacheSound( "WeaponDissolve.Beam" )
 util.PrecacheSound( "WeaponDissolve.Dissolve" )
+--register models and materials
+resource.AddFile( "models/hzn_factory.mdl" )
+resource.AddFile( "materials/models/hzn_factory.vmt" )
  
 function ENT:Initialize()
 	self.BaseClass.Initialize(self)

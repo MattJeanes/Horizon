@@ -7,6 +7,9 @@ include('shared.lua')
 util.PrecacheSound( "trainyard.train_move" )
 util.PrecacheSound( "trainyard.train_idle" )
 util.PrecacheSound( "trainyard.train_brake" )
+--register models and materials
+resource.AddFile( "models/mining_drill.mdl" )
+resource.AddFile( "materials/models/mining_drill.vmt" )
  
 function ENT:Initialize()
 	self.BaseClass.Initialize(self)

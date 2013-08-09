@@ -3,6 +3,18 @@ AddCSLuaFile( "shared.lua" )
 
 include('shared.lua')
 
+--register models and materials
+resource.AddFile( "models/lg_asteroid001.mdl" )
+resource.AddFile( "models/lg_asteroid002.mdl" )
+resource.AddFile( "models/lg_asteroid003.mdl" )
+resource.AddFile( "models/med_asteroid001.mdl" )
+resource.AddFile( "models/med_asteroid002.mdl" )
+resource.AddFile( "models/med_asteroid003.mdl" )
+resource.AddFile( "models/sm_asteroid001.mdl" )
+resource.AddFile( "models/sm_asteroid002.mdl" )
+resource.AddFile( "models/sm_asteroid003.mdl" )
+resource.AddFile( "materials/models/asteroid.vmt" )
+
 local models = {}
 	local large = {}
 		large[1] = "models/lg_asteroid001.mdl"

@@ -2,6 +2,9 @@ AddCSLuaFile( "cl_init.lua" )
 AddCSLuaFile( "shared.lua" )
  
 include('shared.lua')
+--register models and materials
+resource.AddFile( "models/link_hub.mdl" )
+resource.AddFile( "materials/models/link_hub.vmt" )
  
 function ENT:Initialize()
 	self:SetModel( "models/link_hub.mdl" )

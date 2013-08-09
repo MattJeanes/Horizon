@@ -7,6 +7,10 @@ include('shared.lua')
 util.PrecacheSound( "Airboat_engine_idle" )
 util.PrecacheSound( "Airboat_engine_stop" )
 util.PrecacheSound( "apc_engine_start" )
+
+--register models and materials
+resource.AddFile( "models/coolant_compressor.mdl" )
+resource.AddFile( "materials/models/coolant_compressor.vmt" )
  
 function ENT:Initialize()
 	self.BaseClass.Initialize(self)

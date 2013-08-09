@@ -4,6 +4,9 @@ AddCSLuaFile( "shared.lua" )
 include('shared.lua')
 
 util.PrecacheSound( "Airboat_engine_idle" )
+--register models and materials
+resource.AddFile( "models/suit_recharger.mdl" )
+resource.AddFile( "materials/models/suit_recharger.vmt" )
  
 function ENT:Initialize()
 	self.BaseClass.Initialize(self)

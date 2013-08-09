@@ -3,11 +3,15 @@ AddCSLuaFile( 'cl_init.lua' )
 
 include('shared.lua')
 include('sv_resources.lua')
-include('sv_networking.lua')
 
 DEFINE_BASECLASS( "gamemode_sandbox" )
 
----------------------------------------------------------------------------------
+--Resources-------
+resource.AddFile( "materials/horizon/bar.png" )
+--NetworkStrings--
+util.AddNetworkString('hznSuit')
+util.AddNetworkString('netEntityInfo')
+--Variables-------
 local temps = {}
 	temps[1] = "cold"
 	temps[2] = "temperate"
@@ -16,7 +20,7 @@ local LastAsteroidSpawn = 0
 local LastThink = 0
 local ThinkRate = 1
 local FactoryEntries = {}
----------------------------------------------------------------------------------
+--Methods---------
 
 -- Sets the default environment for an entity ( default environment = space )
 function GM:SetDefaultEnv( ent )
@@ -92,14 +96,13 @@ function GM:PlayerSpawn( ply )
 	self.BaseClass:PlayerSpawn( ply )
 	player_manager.SetPlayerClass( ply, "player_horizon" )
 	player_manager.RunClass(ply, "Init")
-	--player_manager.RunClass(ply, "netUpdate", ply)
 end
 
 -- Hurts the given player
 function GM:HurtPlayer( ply, dmg )
 	if ply:IsValid() then
 		ply:SetHealth( ply:Health() - dmg )				
-		ply:EmitSound("buttons/combine_button3.wav")
+		ply:EmitSound( "buttons/combine_button3.wav" )
 		if ply:Health() < 1 then ply:Kill() end
 	end
 end
@@ -124,8 +127,7 @@ end
 
 -- Tries to spawns an asteroid of random type in a random (free) location
 function GM:SpawnAsteroid()
-	local ent = ents.Create(self:ChooseAsteroidType())
-	--local ent = ents.Create( "hzn_asteroid_large" )
+	local ent = ents.Create( self:ChooseAsteroidType() )
 	local coords = self:GetMapCoords( 15000 )
 	local tries = 0
 	while table.Count( ents.FindInSphere(coords, 500) ) > 0  and tries < 5 do

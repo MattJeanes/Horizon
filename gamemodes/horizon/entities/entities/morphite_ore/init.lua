@@ -2,6 +2,9 @@ AddCSLuaFile( "cl_init.lua" )
 AddCSLuaFile( "shared.lua" )
  
 include('shared.lua')
+--register models and materials
+resource.AddFile( "models/morphite_ore.mdl" )
+resource.AddFile( "materials/models/morphite_ore.vmt" )
  
 function ENT:Initialize()
 	self:SetModel( "models/morphite_ore.mdl" )

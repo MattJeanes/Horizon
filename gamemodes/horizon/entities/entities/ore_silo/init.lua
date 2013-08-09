@@ -2,7 +2,10 @@ AddCSLuaFile( "cl_init.lua" )
 AddCSLuaFile( "shared.lua" )
  
 include('shared.lua')
- 
+--register models and materials
+resource.AddFile( "models/ore_silo.mdl" )
+resource.AddFile( "materials/models/ore_silo.vmt" )
+
 function ENT:Initialize()
 	self.BaseClass.Initialize(self)
 	self:SetModel( "models/ore_silo.mdl" )

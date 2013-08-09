@@ -22,7 +22,7 @@ surface.CreateFont( "PixelFont", {
 local FactoryEntries = {}
 
 local TextColor = Color( 255, 255, 255, 255)
-local BarMaterial = Material("horizon/bar.png")
+local BarMaterial = Material( "horizon/bar.png" )
 local Font = "PixelFont"
 
 local panel_w = 256

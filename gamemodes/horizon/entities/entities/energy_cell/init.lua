@@ -2,6 +2,10 @@ AddCSLuaFile( "cl_init.lua" )
 AddCSLuaFile( "shared.lua" )
  
 include('shared.lua')
+
+--register models and materials
+resource.AddFile( "models/energy_cell.mdl" )
+resource.AddFile( "materials/models/energy_cell.vmt" )
  
 function ENT:Initialize()
 	self.BaseClass.Initialize(self)

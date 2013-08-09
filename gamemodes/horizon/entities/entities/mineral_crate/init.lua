@@ -4,6 +4,9 @@ AddCSLuaFile( "shared.lua" )
 include('shared.lua')
 
 util.PrecacheSound( "cavernrock.impacthard" )
+--register models and materials
+resource.AddFile( "models/mineral_crate.mdl" )
+resource.AddFile( "materials/models/mineral_crate.vmt" )
  
 function ENT:Initialize()
 	self.BaseClass.Initialize(self)

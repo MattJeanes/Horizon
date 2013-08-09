@@ -4,6 +4,9 @@ AddCSLuaFile( "shared.lua" )
 include('shared.lua')
 
 util.PrecacheSound( "d3_citadel.weapon_zapper_beam_loop2" )
+--register models and materials
+resource.AddFile( "models/mining_laser.mdl" )
+resource.AddFile( "materials/models/mining_laser_ao.vmt" )
  
 function ENT:Initialize()
 	self.BaseClass.Initialize(self)
