@@ -19,7 +19,7 @@ function ENT:Initialize()
 	self:SetUseType( ONOFF_USE )
 	-- resource rates
 	self:RegisterConsumedResource( "energy", 60)
-	self:RegisterConsumedResource( "water", 60)
+	self:RegisterConsumedResource( "water", 30)
 	self:RegisterProducedResource( "air", 15)
 	self:RegisterProducedResource( "hydrogen", 15)
 	-- check physics

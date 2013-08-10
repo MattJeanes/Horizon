@@ -124,7 +124,7 @@ function GM:ChooseAsteroidType()
 	return "hzn_asteroid_medium"
 end
 
--- Tries to spawns an asteroid of random type in a random (free) location
+-- Tries to spawn an asteroid of random type in a random (free) location
 function GM:SpawnAsteroid()
 	local ent = ents.Create( self:ChooseAsteroidType() )
 	local coords = self:GetMapCoords( 15000 )

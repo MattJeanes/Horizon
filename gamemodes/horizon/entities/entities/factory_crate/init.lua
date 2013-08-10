@@ -23,7 +23,6 @@ function ENT:OnTakeDamage()
 	self:Remove()
 	return ent
 end
-
  
 function ENT:Think()
 end

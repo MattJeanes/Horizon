@@ -93,6 +93,17 @@ function ENT:AsteroidSplit( className, numSplits )
 	end
 end
 
+--[[
+function ENT:OnTakeDamage()
+	local ent = ents.Create( self.Product )
+		ent:SetPos( self:GetPos() )
+		ent:Spawn()
+	local phys = ent:GetPhysicsObject()
+	self:GibBreakClient( Vector( 100, 100, 100 ) )
+	self:Remove()
+	return ent
+end]]
+
 -- function ENT:TakeDamageInfo( damageInfo )
 	-- if self:Health() <= 0 then self:Collision() return end
 	-- print( self:Health() )
