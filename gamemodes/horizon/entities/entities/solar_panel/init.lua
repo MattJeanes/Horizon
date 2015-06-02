@@ -27,13 +27,31 @@ function ENT:Initialize()
 end
 
 function ENT:ReceivesLight()
+	local hit
 	local sun = GAMEMODE:GetSun()
-	local tracedata = {}
-		tracedata.start = self:GetPos()
-		tracedata.endpos = sun:GetPos()
-		tracedata.filter = { self, sun }
-	local trace = util.TraceLine(tracedata)
-	return not trace.Hit
+	if sun then
+		local ang = sun:GetSaveTable().sun_dir:Angle()
+		if ang then
+			local startPos = self:GetPos()
+			local tracedata = {}
+			tracedata.start = startPos
+			tracedata.endpos = startPos + (ang:Forward()*160000)
+			tracedata.filter = self
+			local trace = util.TraceLine(tracedata)
+			hit=trace.HitSky
+		end
+	else
+		local startPos = Vector(0, 0, 0)
+		local endPos = 	self:GetPos()
+		local tracedata = {}
+		tracedata.start = startPos
+		tracedata.endpos = endPos
+		tracedata.filter = self
+		local trace = util.TraceLine(tracedata)
+		hit=trace.Hit
+	end
+
+	return hit
 end
 
 function ENT:CanOperate()

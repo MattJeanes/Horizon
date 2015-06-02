@@ -98,14 +98,14 @@ function VGUI:Init()
 		cancelButton.DoClick = function()
 			FactoryMenu:Remove()
 		end
-	-- create deposit button
+	-- create fill button
 	storageButton = vgui.Create( "DButton" )
 		storageButton:SetParent( ButtonsPanel )
-		storageButton:SetText( "Deposit Crate" )
+		storageButton:SetText( "Fill Crate" )
 		storageButton:SetPos( ButtonsPanel:GetWide() / 3, 0 )
 		storageButton:SetSize( 128 + 64, 42 )
 		storageButton.DoClick = function ()
-			RunConsoleCommand("absorbcrate", entID)
+			RunConsoleCommand("fillcrate", entID)
 			FactoryMenu:Remove()
 		end
 	-- create build button

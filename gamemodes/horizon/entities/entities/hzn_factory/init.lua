@@ -121,7 +121,7 @@ end
 function ENT:BeginReplication( product )
 	-- create the crate containing the product
 	local ent = ents.Create( "factory_crate" )
-		ent:SetPos( self:GetPos() + Vector(0,0,60) )
+		ent:SetPos( self:LocalToWorld(Vector(0,0,60)) )
 		ent:SetMaterial( "models/props_combine/portalball001_sheet" )
 		ent:Spawn()
 		ent:SetProduct( product )
@@ -183,29 +183,29 @@ function builditem( ply, cmd, args )
 end
 concommand.Add( "builditem" , builditem)
 
-function ENT:AbsorbCrate()
+function ENT:FillCrate()
 	if self.CrateID == 0 then return end
 	if self.Link == nil then return end
 	for _, crate in pairs(ents.FindByClass("mineral_crate")) do
 		if crate:GetCreationID() == self.CrateID then
-			self.Link:StoreResource( "morphite", crate.StoredResources["morphite"] )
-			self.Link:StoreResource( "nocxium", crate.StoredResources["nocxium"] )
-			self.Link:StoreResource( "isogen", crate.StoredResources["isogen"])
-			self:Dissolve( crate )
+			crate:AddResource( "morphite", self.Link:RetrieveResource( "morphite", crate.MaxStoredResources["morphite"] - crate.StoredResources["morphite"] ) )
+			crate:AddResource( "nocxium", self.Link:RetrieveResource( "nocxium", crate.MaxStoredResources["nocxium"] - crate.StoredResources["nocxium"] ) )
+			crate:AddResource( "isogen", self.Link:RetrieveResource( "isogen", crate.MaxStoredResources["isogen"] - crate.StoredResources["isogen"] ) )
+			
 			return
 		end
 	end
 end
 
-function absorbcrate(ply, cmd, args)
+function fillcrate(ply, cmd, args)
 	for _, ent in pairs(ents.FindByClass("hzn_factory")) do
 		if ent:GetCreationID() == tonumber(args[1]) then
-			ent:AbsorbCrate()
+			ent:FillCrate()
 			return
 		end
 	end
 end
-concommand.Add("absorbcrate", absorbcrate)
+concommand.Add("fillcrate", fillcrate)
 
 function ENT:CanOperate()
 	return true
