@@ -68,9 +68,12 @@ function ENT:Execute()
 		effectData:SetOrigin(trace.HitPos)
 		effectData:SetScale( 1 )
 		util.Effect( "StunstickImpact", effectData )
-		if trace.Entity.isAsteroid then
-			trace.Entity.Health = trace.Entity.Health - 1
-			if trace.Entity.Health < 1 then trace.Entity:AsteroidSplit( 2 ) end
+		if trace.Entity.isAsteroid and trace.Entity:GetClass() ~= trace.Entity.SmallerAsteroid then
+			trace.Entity:SetHealth(trace.Entity:Health() - 1)
+			if trace.Entity:Health() < 1 then
+				trace.Entity:AsteroidSplit( trace.Entity.SmallerAsteroid, trace.Entity.AsteroidSize=="medium" and 10 or 2 )
+				trace.Entity:Remove()
+			end
 		end
 	end
 end

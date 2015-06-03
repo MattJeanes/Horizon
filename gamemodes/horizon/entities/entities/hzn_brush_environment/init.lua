@@ -24,7 +24,7 @@ function ENT:StartTouch( ent )
 		ent:Collision()
 		return
 	end
-	GAMEMODE:SetEnvironment( ent, self)
+	GAMEMODE:SetEnvironment(ent, self)
 end
 
 function ENT:EndTouch( ent )
@@ -72,13 +72,3 @@ function ENT:KeyValue( key, value )
 		end	
 	end
 end
-
-
-
-
-
-
-
-
-
-

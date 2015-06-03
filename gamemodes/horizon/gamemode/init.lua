@@ -18,7 +18,7 @@ local temps = {}
 local LastAsteroidSpawn = 0
 local LastThink = 0
 local ThinkRate = 1
-local FactoryEntries = {}
+GM.FactoryEntries = GM.FactoryEntries or {}
 --Methods---------
 
 -- Sets the default environment for an entity ( default environment = space )
@@ -99,10 +99,18 @@ end
 
 -- Hurts the given player
 function GM:HurtPlayer( ply, dmg )
-	if ply:IsValid() then
-		ply:SetHealth( ply:Health() - dmg )				
-		ply:EmitSound( "buttons/combine_button3.wav" )
-		if ply:Health() < 1 then ply:Kill() end
+	if not tobool(GetConVarNumber("sbox_godmode")) and IsValid(ply) and not ply:HasGodMode() then
+		if not ply.hzn_hp or math.floor(ply.hzn_hp)~=ply:Health() then ply.hzn_hp=ply:Health() end -- workaround for hp being an integer
+		local before=ply:Health()
+		ply.hzn_hp = ply.hzn_hp - dmg
+		ply:SetHealth( ply.hzn_hp )
+		if ply:Health()~=before then
+			ply:EmitSound( "buttons/combine_button3.wav" )
+		end
+		if ply:Health() < 1 then
+			ply:Kill()
+			ply.hzn_hp=nil
+		end
 	end
 end
 
@@ -156,6 +164,11 @@ function GM:OnEntityCreated( ent )
 	self.BaseClass:OnEntityCreated( ent )
 	if IsValid( ent ) and ent.CurrentEnv == nil then
 		self:SetDefaultEnv( ent )
+		timer.Simple(0,function()
+			if IsValid(self) then
+				self:SetDefaultEnv( ent )
+			end
+		end)
 	end
 end
 
@@ -179,12 +192,12 @@ end
 
 -- Returns a list of items available in the factory
 function GM:GetFactoryEntries()
-	return FactoryEntries
+	return self.FactoryEntries
 end
 
 -- Registers an item with the gamemode so that factories can produce it.
 function GM:RegisterFactoryEntry( FactoryEntry )
-	FactoryEntries[FactoryEntry.DisplayName] = FactoryEntry
+	self.FactoryEntries[FactoryEntry.DisplayName] = FactoryEntry
 end
 
 -- Hooks
@@ -194,27 +207,48 @@ local function onPlayerThink( ply )
 	local FTime = FrameTime()
 	for k, ply in pairs( player.GetAll() ) do
 		if ply:IsValid() and ply:IsPlayer() and ply:Alive() then
+			--GAMEMODE:SetDefaultEnv(ply)
 			local dmg = 0
 			local env = ply.CurrentEnv
 			if env == nil or env.dt == nil then
-				if ply.SuitAir > 0		then ply.SuitAir		= ply.SuitAir - 1 * FTime	else dmg = dmg + 10 * FTime end
-				if ply.SuitPower > 0	then ply.SuitPower		= ply.SuitPower - 1 * FTime else dmg = dmg + 5 * FTime end
+				if ply.SuitAir > 0 then
+					ply.SuitAir = ply.SuitAir - 1 * FTime
+				else
+					dmg = dmg + 5
+				end
+				if ply.SuitPower > 0 then
+					ply.SuitPower = ply.SuitPower - 1 * FTime
+				else
+					dmg = dmg + 2
+				end
 			else
 				-- Update air reserves
 				if not env.dt.Breathable then			
-					if ply.SuitAir > 0 then ply.SuitAir = ply.SuitAir - 1 * FTime else dmg = dmg + 10 * FTime end
+					if ply.SuitAir > 0 then
+						ply.SuitAir = ply.SuitAir - 1 * FTime
+					else
+						dmg = dmg + 5
+					end
 				end
 				-- Update coolant reserves
 				if temps[env.dt.Temp] == temps[3] then
-					if ply.SuitCoolant > 0 then	ply.SuitCoolant = ply.SuitCoolant - 1 * FTime else dmg = dmg + 5 * FTime end
+					if ply.SuitCoolant > 0 then
+						ply.SuitCoolant = ply.SuitCoolant - 1 * FTime
+					else
+						dmg = dmg + 2
+					end
 				end
 				-- Update power reserves
 				if temps[env.dt.Temp] == temps[1] then
-					if ply.SuitPower > 0 then ply.SuitPower = ply.SuitPower - 1	* FTime else dmg = dmg + 5 * FTime end
+					if ply.SuitPower > 0 then
+						ply.SuitPower = ply.SuitPower - 1 * FTime
+					else
+						dmg = dmg + 2
+					end
 				end
 			end
 			if dmg > 0 then
-				GAMEMODE:HurtPlayer( ply, dmg )
+				GAMEMODE:HurtPlayer( ply, dmg*FTime )
 			end
 		end
 	end

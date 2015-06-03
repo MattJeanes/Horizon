@@ -63,7 +63,7 @@ function ENT:Collision()
 	end		
 	self:Remove()
 	if self:GetClass() != self.SmallerAsteroid then
-		self:AsteroidSplit( self.SmallerAsteroid , 2 )
+		self:AsteroidSplit( self.SmallerAsteroid, self.AsteroidSize=="medium" and 10 or 2 )
 	end
 end
 
@@ -72,19 +72,21 @@ function ENT:AsteroidSplit( className, numSplits )
 	local y
 	local z
 	local ent
-	for i = 1 , numSplits , 1 do
+	for i = 1, numSplits, 1 do
 		x = math.random() * 1000 - 500
 		y = math.random() * 1000 - 500
 		z = math.random() * 1000 - 500
 		ent = ents.Create( className )
-		ent:SetPos( self:GetPos() + Vector( x, y, z ) )
-		ent:SetVelocity( self:GetVelocity() )
+		ent:SetPos( self:LocalToWorld(Vector( x, y, z )) )
 		ent:Spawn()
 		GAMEMODE:SetDefaultEnv(ent)
+		local phys = ent:GetPhysicsObject()
+		phys:SetVelocityInstantaneous( self:GetVelocity() )
+		
 		x = math.random() * 200 - 100
 		y = math.random() * 200 - 100
 		z = math.random() * 200 - 100
-		local phys = ent:GetPhysicsObject()
+		
 		phys:ApplyForceCenter( Vector( x, y, z ) )	 
 		x = math.random() * 4 - 2
 		y = math.random() * 4 - 2
